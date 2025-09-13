@@ -1,0 +1,124 @@
+import React from 'react'
+import { motion } from 'framer-motion'
+import { useInventory } from '@/context/InventoryContext'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Activity, ArrowUp, ArrowDown, RefreshCw, ArrowRight } from 'lucide-react'
+import { formatDate } from '@/lib/utils'
+
+const RecentActivity: React.FC = () => {
+  const { state } = useInventory()
+  const { stockMovements } = state
+
+  const getMovementIcon = (type: string) => {
+    switch (type) {
+      case 'in':
+        return ArrowUp
+      case 'out':
+        return ArrowDown
+      case 'adjustment':
+        return RefreshCw
+      default:
+        return Activity
+    }
+  }
+
+  const getMovementColor = (type: string) => {
+    switch (type) {
+      case 'in':
+        return 'text-green-600'
+      case 'out':
+        return 'text-red-600'
+      case 'adjustment':
+        return 'text-blue-600'
+      default:
+        return 'text-gray-600'
+    }
+  }
+
+  const getMovementBadgeVariant = (type: string) => {
+    switch (type) {
+      case 'in':
+        return 'success' as const
+      case 'out':
+        return 'destructive' as const
+      case 'adjustment':
+        return 'secondary' as const
+      default:
+        return 'outline' as const
+    }
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center space-x-2">
+            <Activity className="h-5 w-5" />
+            <span>Recent Activity</span>
+          </CardTitle>
+          <Badge variant="outline">
+            {stockMovements.length} movements
+          </Badge>
+        </div>
+      </CardHeader>
+      
+      <CardContent>
+        <div className="space-y-4">
+          {stockMovements.slice(0, 5).map((movement, index) => {
+            const Icon = getMovementIcon(movement.type)
+            
+            return (
+              <motion.div
+                key={movement.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.1 }}
+                className="flex items-center space-x-4 p-3 rounded-lg hover:bg-accent transition-colors duration-200"
+              >
+                <div className={`p-2 rounded-lg bg-accent`}>
+                  <Icon className={`h-4 w-4 ${getMovementColor(movement.type)}`} />
+                </div>
+                
+                <div className="flex-1 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-medium text-foreground">
+                      {movement.productName}
+                    </h4>
+                    <Badge variant={getMovementBadgeVariant(movement.type)} className="text-xs">
+                      {movement.type.toUpperCase()}
+                    </Badge>
+                  </div>
+                  
+                  <div className="flex items-center justify-between text-sm text-muted-foreground">
+                    <span>Qty: {movement.quantity}</span>
+                    <span>{formatDate(movement.createdAt)}</span>
+                  </div>
+                  
+                  <p className="text-xs text-muted-foreground truncate">
+                    {movement.reason}
+                  </p>
+                </div>
+              </motion.div>
+            )
+          })}
+        </div>
+        
+        {stockMovements.length === 0 && (
+          <div className="text-center py-8">
+            <Activity className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <p className="text-muted-foreground">No recent activity</p>
+          </div>
+        )}
+        
+        <Button variant="outline" className="w-full mt-4 group">
+          View All Activity
+          <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+        </Button>
+      </CardContent>
+    </Card>
+  )
+}
+
+export default RecentActivity
