@@ -1,4 +1,3 @@
-import React from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { InventoryProvider } from '@/context/InventoryContext'
 import Layout from '@/components/layout/Layout'
