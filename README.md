@@ -1,0 +1,482 @@
+# 🚀 Inventrika - AI-Powered Inventory Management System
+
+<div align="center">
+  <img src="https://img.shields.io/badge/React-18.2.0-61DAFB?style=for-the-badge&logo=react&logoColor=white" alt="React" />
+  <img src="https://img.shields.io/badge/TypeScript-5.2.2-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Vite-4.5.0-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS-3.3.5-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS" />
+</div>
+
+<div align="center">
+  <h3>A modern, AI-powered inventory management system with beautiful UI and intelligent insights</h3>
+  <p>Built with React, TypeScript, and cutting-edge web technologies</p>
+</div>
+
+---
+
+## 📋 Table of Contents
+
+- [✨ Features](#-features)
+- [🎯 AI-Powered Capabilities](#-ai-powered-capabilities)
+- [🛠️ Tech Stack](#️-tech-stack)
+- [🚀 Quick Start](#-quick-start)
+- [📁 Project Structure](#-project-structure)
+- [🔧 Backend Development Guide](#-backend-development-guide)
+- [🔌 API Integration](#-api-integration)
+- [📊 Data Models](#-data-models)
+- [🌐 Deployment](#-deployment)
+- [🤝 Contributing](#-contributing)
+
+## ✨ Features
+
+### 🎛️ **Dashboard & Analytics**
+- **Real-time Inventory Overview** - Live stats and KPIs
+- **Interactive Charts** - Sales trends, revenue analytics, category distribution
+- **AI-Powered Insights** - Demand forecasting, reorder suggestions, anomaly detection
+- **Smart Alerts** - Low stock warnings, overstock notifications
+- **Performance Metrics** - Top-selling products, supplier performance
+
+### 📦 **Inventory Management**
+- **Product CRUD Operations** - Add, edit, delete, and view products
+- **Advanced Search & Filtering** - Multi-criteria search with real-time results
+- **Stock Level Monitoring** - Automatic low stock alerts and recommendations
+- **Category Management** - Organize products with color-coded categories
+- **Supplier Management** - Track supplier information and performance ratings
+
+### 🤖 **AI Features**
+- **Demand Forecasting** - Predict future inventory needs with confidence scores
+- **Smart Reorder Suggestions** - AI-driven restocking recommendations
+- **Trend Analysis** - Identify sales patterns and market trends
+- **Anomaly Detection** - Flag unusual inventory movements
+- **Predictive Analytics** - Data-driven insights for business decisions
+
+### 🎨 **User Experience**
+- **Responsive Design** - Perfect on desktop, tablet, and mobile devices
+- **Dark/Light Theme** - Toggle between themes with smooth transitions
+- **Smooth Animations** - Framer Motion powered micro-interactions
+- **Modern UI** - Clean, professional interface with glass morphism effects
+
+## 🛠️ Tech Stack
+
+### **Frontend Framework**
+- **React 18** - Modern React with hooks and concurrent features
+- **TypeScript** - Type-safe development with excellent IDE support
+- **Vite** - Lightning-fast build tool and development server
+
+### **Styling & UI**
+- **Tailwind CSS** - Utility-first CSS framework
+- **Radix UI** - Unstyled, accessible UI components
+- **Framer Motion** - Production-ready motion library
+- **Lucide React** - Beautiful, customizable icons
+
+### **Data & State Management**
+- **React Context API** - Global state management
+- **React Router** - Client-side routing
+- **Recharts** - Composable charting library
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Node.js 18+ 
+- npm or yarn package manager
+- Git
+
+### Installation
+
+1. **Clone the repository**
+```bash
+git clone https://github.com/MugishaProsper/ai-inventory-front.git
+cd ai-inventory-front
+```
+
+2. **Install dependencies**
+```bash
+npm install
+```
+
+3. **Start development server**
+```bash
+npm run dev
+```
+
+4. **Open in browser**
+```
+http://localhost:5173
+```
+
+### Available Scripts
+
+```bash
+npm run dev          # Start development server
+npm run build        # Build for production
+npm run preview      # Preview production build
+npm run lint         # Run ESLint
+```
+
+## 📁 Project Structure
+
+```
+src/
+├── components/          # Reusable UI components
+│   ├── ui/             # Basic UI components (Button, Card, etc.)
+│   ├── layout/         # Layout components (Header, Sidebar)
+│   └── dashboard/      # Dashboard-specific components
+├── pages/              # Page components
+│   ├── Dashboard.tsx   # Main dashboard page
+│   ├── Products.tsx    # Product management page
+│   ├── Analytics.tsx   # Analytics and reports
+│   └── ...
+├── context/            # React Context providers
+│   └── InventoryContext.tsx
+├── types/              # TypeScript type definitions
+│   └── index.ts
+├── lib/                # Utility functions
+│   └── utils.ts
+├── data/               # Mock data and constants
+│   └── mockData.ts
+└── App.tsx             # Main application component
+```
+
+## 🔧 Backend Development Guide
+
+### **Recommended Tech Stack**
+
+#### **Option 1: Node.js/Express**
+```bash
+# Initialize backend project
+mkdir inventrika-backend
+cd inventrika-backend
+npm init -y
+
+# Install dependencies
+npm install express mongoose cors helmet morgan bcryptjs jsonwebtoken
+npm install -D nodemon @types/node typescript ts-node
+```
+
+#### **Option 2: Python/FastAPI**
+```bash
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate
+
+# Install dependencies
+pip install fastapi uvicorn sqlalchemy alembic pydantic python-jose passlib
+```
+
+### **Database Schema**
+
+#### **Products Table**
+```sql
+CREATE TABLE products (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(255) NOT NULL,
+    sku VARCHAR(100) UNIQUE NOT NULL,
+    category_id UUID REFERENCES categories(id),
+    description TEXT,
+    price DECIMAL(10,2) NOT NULL,
+    cost DECIMAL(10,2) NOT NULL,
+    quantity INTEGER NOT NULL DEFAULT 0,
+    min_stock INTEGER NOT NULL DEFAULT 0,
+    max_stock INTEGER NOT NULL DEFAULT 1000,
+    supplier_id UUID REFERENCES suppliers(id),
+    location VARCHAR(255),
+    image_url VARCHAR(500),
+    status VARCHAR(20) DEFAULT 'active',
+    tags TEXT[],
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+#### **Categories Table**
+```sql
+CREATE TABLE categories (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(255) NOT NULL UNIQUE,
+    description TEXT,
+    color VARCHAR(50) DEFAULT 'bg-blue-500',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+#### **Stock Movements Table**
+```sql
+CREATE TABLE stock_movements (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    product_id UUID REFERENCES products(id),
+    type VARCHAR(20) NOT NULL, -- 'in', 'out', 'adjustment'
+    quantity INTEGER NOT NULL,
+    reason TEXT,
+    reference VARCHAR(255),
+    created_by UUID REFERENCES users(id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+### **API Endpoints Structure**
+
+#### **Products API**
+```typescript
+// GET /api/products - Get all products with filtering
+interface ProductsQuery {
+  page?: number
+  limit?: number
+  search?: string
+  category?: string
+  supplier?: string
+  status?: string
+  sortBy?: string
+  sortOrder?: 'asc' | 'desc'
+}
+
+// POST /api/products - Create new product
+// PUT /api/products/:id - Update product
+// DELETE /api/products/:id - Delete product
+// GET /api/products/:id - Get single product
+```
+
+#### **Analytics API**
+```typescript
+// GET /api/analytics/dashboard - Dashboard statistics
+interface DashboardResponse {
+  totalProducts: number
+  totalValue: number
+  lowStockItems: number
+  outOfStockItems: number
+  monthlyRevenue: number
+  monthlyRevenueChange: number
+  topSellingProducts: TopProduct[]
+  recentAlerts: Alert[]
+}
+```
+
+#### **AI Insights API**
+```typescript
+// GET /api/ai/insights - Get AI insights
+interface AIInsightResponse {
+  insights: AIInsight[]
+  lastUpdated: string
+}
+
+// POST /api/ai/forecast - Generate demand forecast
+// POST /api/ai/reorder-suggestions - Get reorder suggestions
+```
+
+## 🔌 API Integration
+
+### **Environment Configuration**
+```typescript
+// .env.local
+VITE_API_BASE_URL=http://localhost:3001/api
+VITE_API_TIMEOUT=10000
+VITE_ENABLE_MOCK_DATA=false
+```
+
+### **API Client Setup**
+```typescript
+// src/lib/api.ts
+class ApiClient {
+  private baseURL: string
+  private timeout: number
+
+  constructor() {
+    this.baseURL = import.meta.env.VITE_API_BASE_URL || '/api'
+    this.timeout = import.meta.env.VITE_API_TIMEOUT || 10000
+  }
+
+  async get<T>(endpoint: string, params?: Record<string, any>): Promise<T> {
+    const url = new URL(endpoint, this.baseURL)
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        url.searchParams.append(key, String(value))
+      })
+    }
+
+    const response = await fetch(url.toString(), {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    })
+
+    if (!response.ok) throw new Error(`API Error: ${response.statusText}`)
+    return response.json()
+  }
+
+  async post<T>(endpoint: string, data: any): Promise<T> {
+    const response = await fetch(`${this.baseURL}${endpoint}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      },
+      body: JSON.stringify(data)
+    })
+
+    if (!response.ok) throw new Error(`API Error: ${response.statusText}`)
+    return response.json()
+  }
+}
+
+export const apiClient = new ApiClient()
+```
+
+### **State Management Integration**
+```typescript
+// Update InventoryContext to use real API
+const InventoryProvider: React.FC<{children: ReactNode}> = ({ children }) => {
+  const [state, dispatch] = useReducer(inventoryReducer, initialState)
+
+  // Replace mock data with API calls
+  useEffect(() => {
+    loadInitialData()
+  }, [])
+
+  const loadInitialData = async () => {
+    dispatch({ type: 'SET_LOADING', payload: true })
+    
+    try {
+      const [products, categories, suppliers] = await Promise.all([
+        apiClient.get<Product[]>('/products'),
+        apiClient.get<Category[]>('/categories'),
+        apiClient.get<Supplier[]>('/suppliers')
+      ])
+      
+      dispatch({ type: 'SET_PRODUCTS', payload: products })
+      dispatch({ type: 'SET_CATEGORIES', payload: categories })
+      dispatch({ type: 'SET_SUPPLIERS', payload: suppliers })
+    } catch (error) {
+      dispatch({ type: 'SET_ERROR', payload: error.message })
+    } finally {
+      dispatch({ type: 'SET_LOADING', payload: false })
+    }
+  }
+}
+```
+
+## 📊 Data Models
+
+### **Core Types**
+```typescript
+// Complete type definitions are in src/types/index.ts
+
+interface Product {
+  id: string
+  name: string
+  sku: string
+  category: string
+  description?: string
+  price: number
+  cost: number
+  quantity: number
+  minStock: number
+  maxStock: number
+  supplier: string
+  location: string
+  imageUrl?: string
+  createdAt: Date
+  updatedAt: Date
+  status: 'active' | 'inactive' | 'discontinued'
+  tags: string[]
+}
+
+interface AIInsight {
+  id: string
+  type: 'demand_forecast' | 'reorder_suggestion' | 'trend_analysis' | 'anomaly_detection'
+  title: string
+  description: string
+  confidence: number // 0-1 scale
+  actionable: boolean
+  productIds: string[]
+  data: any
+  createdAt: Date
+}
+```
+
+### **API Response Types**
+```typescript
+interface ApiResponse<T> {
+  success: boolean
+  data: T
+  message?: string
+  pagination?: {
+    page: number
+    limit: number
+    total: number
+    totalPages: number
+  }
+}
+
+interface ErrorResponse {
+  success: false
+  error: {
+    code: string
+    message: string
+    details?: any
+  }
+}
+```
+
+## 🌐 Deployment
+
+### **Frontend Deployment (Vercel)**
+```bash
+# Install Vercel CLI
+npm i -g vercel
+
+# Deploy
+vercel --prod
+```
+
+### **Environment Variables**
+```bash
+# Production environment variables
+VITE_API_BASE_URL=https://your-api-domain.com/api
+VITE_ENABLE_ANALYTICS=true
+```
+
+### **Docker Deployment**
+```dockerfile
+# Dockerfile
+FROM node:18-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY . .
+RUN npm run build
+
+FROM nginx:alpine
+COPY --from=builder /app/dist /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+```
+
+## 🤝 Contributing
+
+### **Development Workflow**
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes
+4. Add tests for new functionality
+5. Commit your changes (`git commit -m 'Add some amazing feature'`)
+6. Push to the branch (`git push origin feature/amazing-feature`)
+7. Open a Pull Request
+
+### **Code Style**
+- Use TypeScript for type safety
+- Follow ESLint configuration
+- Use Prettier for code formatting
+- Write meaningful commit messages
+- Add JSDoc comments for complex functions
+
+---
+
+<div align="center">
+  <p>Built with ❤️ by the Inventrika Team</p>
+  <p>
+    <a href="#-table-of-contents">Back to Top</a> •
+    <a href="https://github.com/MugishaProsper/ai-inventory-front/issues">Report Bug</a> •
+    <a href="https://github.com/MugishaProsper/ai-inventory-front/issues">Request Feature</a>
+  </p>
+</div>
