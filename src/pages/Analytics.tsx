@@ -3,8 +3,8 @@ import { motion } from 'framer-motion'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts'
-import { BarChart3, TrendingUp, Download, Calendar, DollarSign, Package, Users } from 'lucide-react'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
+import { BarChart3, TrendingUp, Download, DollarSign, Package, Users } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
 
 const Analytics: React.FC = () => {

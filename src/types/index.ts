@@ -14,7 +14,7 @@ export interface Product {
   imageUrl?: string
   createdAt: Date
   updatedAt: Date
-  status: 'active' | 'inactive' | 'discontinued'
+  status: 'ACTIVE' | 'INACTIVE' | 'DISCONTINUED'
   tags: string[]
 }
 
@@ -43,7 +43,7 @@ export interface StockMovement {
   id: string
   productId: string
   productName: string
-  type: 'in' | 'out' | 'adjustment'
+  type: 'IN' | 'OUT' | 'ADJUSTMENTS'
   quantity: number
   reason: string
   reference?: string
@@ -54,7 +54,7 @@ export interface StockMovement {
 export interface AlertRule {
   id: string
   name: string
-  type: 'low_stock' | 'overstock' | 'expiring' | 'custom'
+  type: 'LOW_STOCK' | 'OVERSTOCK' | 'EXPIRING' | 'CUSTOM'
   productIds: string[]
   threshold: number
   isActive: boolean
@@ -63,7 +63,7 @@ export interface AlertRule {
 
 export interface AIInsight {
   id: string
-  type: 'demand_forecast' | 'reorder_suggestion' | 'trend_analysis' | 'anomaly_detection'
+  type: 'DEMAND_FORECAST' | 'REORDER_SUGGESTION' | 'TREND_ANALYSIS' | 'ANOMALY_DETECTION'
   title: string
   description: string
   confidence: number
@@ -93,7 +93,7 @@ export interface DashboardStats {
     id: string
     type: string
     message: string
-    severity: 'low' | 'medium' | 'high'
+    severity: 'LOW' | 'MEDIUM' | 'HIGH'
     createdAt: Date
   }>
 }
@@ -102,7 +102,7 @@ export interface User {
   id: string
   name: string
   email: string
-  role: 'admin' | 'manager' | 'staff'
+  role: 'ADMIN' | 'MANAGER' | 'STAFF'
   avatar?: string
   createdAt: Date
 }
@@ -117,5 +117,5 @@ export interface FilterOptions {
   minStock?: number
   maxStock?: number
   sortBy?: string
-  sortOrder?: 'asc' | 'desc'
+  sortOrder?: 'ASC' | 'DESC'
 }

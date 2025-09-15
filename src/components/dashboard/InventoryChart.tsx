@@ -14,8 +14,8 @@ const mockChartData = [
 ]
 
 const InventoryChart: React.FC = () => {
-  const [chartType, setChartType] = useState<'bar' | 'line' | 'area'>('bar')
-  const [dataType, setDataType] = useState<'value' | 'stock' | 'revenue'>('value')
+  const [chartType, setChartType] = useState<'BAR' | 'LINE' | 'AREA'>('BAR')
+  const [dataType, setDataType] = useState<'VALUE' | 'STOCK' | 'REVENUE'>('VALUE')
 
   const renderChart = () => {
     const commonProps = {
@@ -24,7 +24,7 @@ const InventoryChart: React.FC = () => {
     }
 
     switch (chartType) {
-      case 'line':
+      case 'LINE':
         return (
           <LineChart {...commonProps}>
             <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
@@ -46,7 +46,7 @@ const InventoryChart: React.FC = () => {
             />
           </LineChart>
         )
-      case 'area':
+      case 'AREA':
         return (
           <AreaChart {...commonProps}>
             <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
@@ -93,9 +93,9 @@ const InventoryChart: React.FC = () => {
 
   const getDataLabel = () => {
     switch (dataType) {
-      case 'stock':
+      case 'STOCK':
         return 'Stock Levels'
-      case 'revenue':
+      case 'REVENUE':
         return 'Revenue'
       default:
         return 'Inventory Value'
@@ -115,25 +115,25 @@ const InventoryChart: React.FC = () => {
             {/* Chart Type Selector */}
             <div className="flex items-center space-x-1 bg-muted rounded-lg p-1">
               <Button
-                variant={chartType === 'bar' ? 'secondary' : 'ghost'}
+                variant={chartType === 'BAR' ? 'secondary' : 'ghost'}
                 size="sm"
-                onClick={() => setChartType('bar')}
+                onClick={() => setChartType('BAR')}
                 className="h-8 px-3"
               >
                 <BarChart3 className="h-4 w-4" />
               </Button>
               <Button
-                variant={chartType === 'line' ? 'secondary' : 'ghost'}
+                variant={chartType === 'LINE' ? 'secondary' : 'ghost'}
                 size="sm"
-                onClick={() => setChartType('line')}
+                onClick={() => setChartType('LINE')}
                 className="h-8 px-3"
               >
                 <TrendingUp className="h-4 w-4" />
               </Button>
               <Button
-                variant={chartType === 'area' ? 'secondary' : 'ghost'}
+                variant={chartType === 'AREA' ? 'secondary' : 'ghost'}
                 size="sm"
-                onClick={() => setChartType('area')}
+                onClick={() => setChartType('AREA')}
                 className="h-8 px-3"
               >
                 <Calendar className="h-4 w-4" />
@@ -143,7 +143,7 @@ const InventoryChart: React.FC = () => {
             {/* Data Type Selector */}
             <select
               value={dataType}
-              onChange={(e) => setDataType(e.target.value as 'value' | 'stock' | 'revenue')}
+              onChange={(e) => setDataType(e.target.value as 'VALUE' | 'STOCK' | 'REVENUE')}
               className="bg-muted border border-border rounded-md px-3 py-1 text-sm"
             >
               <option value="value">Value</option>

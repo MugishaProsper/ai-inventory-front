@@ -4,23 +4,24 @@ import { useInventory } from '@/context/InventoryContext'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Brain, TrendingUp, AlertTriangle, Target, Zap, RefreshCw, Filter } from 'lucide-react'
+import { Brain, TrendingUp, AlertTriangle, Target, Zap, RefreshCw } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
+import { AIInsight } from '@/types'
 
 const AIInsights: React.FC = () => {
   const { state } = useInventory()
   const { aiInsights, loading } = state
-  const [filter, setFilter] = useState<'all' | 'demand_forecast' | 'reorder_suggestion' | 'trend_analysis' | 'anomaly_detection'>('all')
+  const [filter, setFilter] = useState<AIInsight["type"] | any>('ALL')
 
   const getInsightIcon = (type: string) => {
     switch (type) {
-      case 'demand_forecast':
+      case 'DEMAND_FORECAST':
         return TrendingUp
-      case 'reorder_suggestion':
+      case 'REORDER_SUGGESTION':
         return AlertTriangle
-      case 'trend_analysis':
+      case 'TREND_ANALYSIS':
         return Target
-      case 'anomaly_detection':
+      case 'ANOMALY_DETECTION':
         return Zap
       default:
         return Brain
@@ -29,13 +30,13 @@ const AIInsights: React.FC = () => {
 
   const getInsightColor = (type: string) => {
     switch (type) {
-      case 'demand_forecast':
+      case 'DEMAND_FORECAST':
         return 'from-blue-500 to-cyan-500'
-      case 'reorder_suggestion':
+      case 'REORDER_SUGGESTION':
         return 'from-red-500 to-orange-500'
-      case 'trend_analysis':
+      case 'TREND_ANALYSIS':
         return 'from-green-500 to-emerald-500'
-      case 'anomaly_detection':
+      case 'ANOMALY_DETECTION':
         return 'from-purple-500 to-pink-500'
       default:
         return 'from-gray-500 to-gray-600'
@@ -50,20 +51,20 @@ const AIInsights: React.FC = () => {
 
   const getInsightTypeLabel = (type: string) => {
     switch (type) {
-      case 'demand_forecast':
+      case 'DEMAND_FORECAST':
         return 'Demand Forecast'
-      case 'reorder_suggestion':
+      case 'REORDER_SUGGESTION':
         return 'Reorder Alert'
-      case 'trend_analysis':
+      case 'TREND_ANALYSIS':
         return 'Trend Analysis'
-      case 'anomaly_detection':
+      case 'ANOMALY_DETECTION':
         return 'Anomaly Detection'
       default:
         return 'AI Insight'
     }
   }
 
-  const filteredInsights = filter === 'all' ? aiInsights : aiInsights.filter(insight => insight.type === filter)
+  const filteredInsights = filter === 'ALL' ? aiInsights : aiInsights.filter(insight => insight.type === filter)
 
   if (loading) {
     return (

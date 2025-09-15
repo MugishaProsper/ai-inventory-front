@@ -24,16 +24,16 @@ const Settings: React.FC = () => {
   const [isDarkMode, setIsDarkMode] = useState(false)
 
   const tabs = [
-    { id: 'profile', label: 'Profile', icon: User },
-    { id: 'notifications', label: 'Notifications', icon: Bell },
-    { id: 'security', label: 'Security', icon: Shield },
-    { id: 'appearance', label: 'Appearance', icon: Palette },
-    { id: 'data', label: 'Data & Export', icon: Database },
+    { id: 'PROFILE', label: 'Profile', icon: User },
+    { id: 'NOTICATIONS', label: 'Notifications', icon: Bell },
+    { id: 'SECURITY', label: 'Security', icon: Shield },
+    { id: 'APPEARANCE', label: 'Appearance', icon: Palette },
+    { id: 'DATA', label: 'Data & Export', icon: Database },
   ]
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case 'profile':
+      case 'PROFILE':
         return (
           <div className="space-y-6">
             <Card>
@@ -85,7 +85,7 @@ const Settings: React.FC = () => {
           </div>
         )
       
-      case 'notifications':
+      case 'NOTIFICATIONS':
         return (
           <div className="space-y-6">
             <Card>
@@ -116,7 +116,7 @@ const Settings: React.FC = () => {
           </div>
         )
       
-      case 'security':
+      case 'SECURITY':
         return (
           <div className="space-y-6">
             <Card>
@@ -169,7 +169,7 @@ const Settings: React.FC = () => {
           </div>
         )
       
-      case 'appearance':
+      case 'APPEARANCE':
         return (
           <div className="space-y-6">
             <Card>
@@ -220,7 +220,7 @@ const Settings: React.FC = () => {
           </div>
         )
       
-      case 'data':
+      case 'DATA':
         return (
           <div className="space-y-6">
             <Card>

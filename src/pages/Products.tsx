@@ -23,7 +23,7 @@ import { formatCurrency, formatNumber } from '@/lib/utils'
 const Products: React.FC = () => {
   const { state, getFilteredProducts } = useInventory()
   const { loading } = state
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  const [viewMode, setViewMode] = useState<'GRID' | 'LIST'>('GRID')
   const [searchTerm, setSearchTerm] = useState('')
 
   const filteredProducts = getFilteredProducts()
@@ -101,17 +101,17 @@ const Products: React.FC = () => {
                 {/* View Mode */}
                 <div className="flex items-center bg-muted rounded-lg p-1">
                   <Button
-                    variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
+                    variant={viewMode === 'GRID' ? 'secondary' : 'ghost'}
                     size="sm"
-                    onClick={() => setViewMode('grid')}
+                    onClick={() => setViewMode('GRID')}
                     className="h-8 px-3"
                   >
                     <Grid3X3 className="h-4 w-4" />
                   </Button>
                   <Button
-                    variant={viewMode === 'list' ? 'secondary' : 'ghost'}
+                    variant={viewMode === 'LIST' ? 'secondary' : 'ghost'}
                     size="sm"
-                    onClick={() => setViewMode('list')}
+                    onClick={() => setViewMode('LIST')}
                     className="h-8 px-3"
                   >
                     <List className="h-4 w-4" />
@@ -155,7 +155,7 @@ const Products: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, delay: 0.2 }}
       >
-        {viewMode === 'grid' ? (
+        {viewMode === 'GRID' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredProducts.map((product, index) => {
               const stockStatus = getStockStatus(product)

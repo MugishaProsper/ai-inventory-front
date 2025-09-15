@@ -53,7 +53,7 @@ const AlertsWidget: React.FC = () => {
             <span>Alerts</span>
           </CardTitle>
           <Badge variant="destructive">
-            {dashboardStats.recentAlerts?.filter(alert => alert.severity === 'high').length || 0} Critical
+            {dashboardStats.recentAlerts?.filter(alert => alert.severity === 'HIGH').length || 0} Critical
           </Badge>
         </div>
       </CardHeader>

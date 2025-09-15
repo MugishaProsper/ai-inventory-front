@@ -151,7 +151,7 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
     // Update product quantity
     const product = state.products.find(p => p.id === movementData.productId)
     if (product) {
-      const newQuantity = movementData.type === 'in' 
+      const newQuantity = movementData.type === 'IN' 
         ? product.quantity + movementData.quantity
         : product.quantity - movementData.quantity
       
@@ -204,7 +204,7 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
         const aValue = (a as any)[state.filters.sortBy!]
         const bValue = (b as any)[state.filters.sortBy!]
         
-        if (state.filters.sortOrder === 'desc') {
+        if (state.filters.sortOrder === 'DESC') {
           return bValue > aValue ? 1 : -1
         }
         return aValue > bValue ? 1 : -1

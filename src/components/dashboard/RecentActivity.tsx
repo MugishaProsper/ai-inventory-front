@@ -13,11 +13,11 @@ const RecentActivity: React.FC = () => {
 
   const getMovementIcon = (type: string) => {
     switch (type) {
-      case 'in':
+      case 'IN':
         return ArrowUp
-      case 'out':
+      case 'OUT':
         return ArrowDown
-      case 'adjustment':
+      case 'ADJUSTMENT':
         return RefreshCw
       default:
         return Activity
@@ -26,11 +26,11 @@ const RecentActivity: React.FC = () => {
 
   const getMovementColor = (type: string) => {
     switch (type) {
-      case 'in':
+      case 'IN':
         return 'text-green-600'
-      case 'out':
+      case 'OUT':
         return 'text-red-600'
-      case 'adjustment':
+      case 'ADJUSTMENT':
         return 'text-blue-600'
       default:
         return 'text-gray-600'
@@ -39,11 +39,11 @@ const RecentActivity: React.FC = () => {
 
   const getMovementBadgeVariant = (type: string) => {
     switch (type) {
-      case 'in':
+      case 'IN':
         return 'success' as const
-      case 'out':
+      case 'OUT':
         return 'destructive' as const
-      case 'adjustment':
+      case 'ADJUSTMENT':
         return 'secondary' as const
       default:
         return 'outline' as const
