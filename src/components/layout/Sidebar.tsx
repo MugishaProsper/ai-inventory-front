@@ -60,7 +60,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 bg-black bg-opacity-25 lg:hidden"
+            className="fixed inset-0 z-40 bg-black bg-opacity-25"
             onClick={onClose}
           />
         )}
@@ -71,7 +71,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         variants={sidebarVariants}
         initial="closed"
         animate={isOpen ? "open" : "closed"}
-        className="fixed inset-y-0 left-0 z-50 w-72 bg-card border-r border-border lg:translate-x-0 lg:static lg:inset-0"
+        className="fixed inset-y-0 left-0 z-50 w-72 bg-card border-r border-border"
       >
         <div className="flex h-full flex-col">
           {/* Logo */}

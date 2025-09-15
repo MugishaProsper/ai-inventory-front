@@ -14,7 +14,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     <div className="min-h-screen bg-background">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       
-      <div className="lg:pl-72">
+      <div className="">
         <Header onMenuClick={() => setSidebarOpen(true)} />
         
         <main className="py-6">
