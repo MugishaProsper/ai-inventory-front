@@ -8,6 +8,7 @@ import Suppliers from '@/pages/Suppliers'
 import Analytics from '@/pages/Analytics'
 import AIInsights from '@/pages/AIInsights'
 import Settings from '@/pages/Settings'
+import Login from './pages/AuthPages/Login'
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
             <Route path="/analytics" element={<Analytics />} />
             <Route path="/ai-insights" element={<AIInsights />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path='/login' element={<Login/>} />
           </Routes>
         </Layout>
       </Router>
