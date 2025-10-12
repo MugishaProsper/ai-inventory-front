@@ -8,7 +8,7 @@ import Suppliers from '@/pages/Suppliers'
 import Analytics from '@/pages/Analytics'
 import AIInsights from '@/pages/AIInsights'
 import Settings from '@/pages/Settings'
-import Login from './pages/AuthPages/Login'
+import Login from './pages/auth/Login'
 
 function App() {
   return (

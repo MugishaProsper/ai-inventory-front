@@ -14,18 +14,15 @@ import {
   Moon,
   Sun,
   Globe,
-  Mail,
-  Phone,
-  MapPin
 } from 'lucide-react'
 
 const Settings: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('profile')
+  const [activeTab, setActiveTab] = useState('PROFILE')
   const [isDarkMode, setIsDarkMode] = useState(false)
 
   const tabs = [
     { id: 'PROFILE', label: 'Profile', icon: User },
-    { id: 'NOTICATIONS', label: 'Notifications', icon: Bell },
+    { id: 'NOTIFICATIONS', label: 'Notifications', icon: Bell },
     { id: 'SECURITY', label: 'Security', icon: Shield },
     { id: 'APPEARANCE', label: 'Appearance', icon: Palette },
     { id: 'DATA', label: 'Data & Export', icon: Database },
