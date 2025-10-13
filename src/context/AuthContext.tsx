@@ -1,6 +1,7 @@
 import AuthService from "@/services/auth.service";
-import { RegisteringUser, User } from "@/types/User";
+import { LoggingUser, RegisteringUser, User } from "@/types/User";
 import React, { createContext, useContext, useReducer } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface AuthState {
     user: User | null;
@@ -34,6 +35,7 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
 
 interface AuthContextType extends AuthState {
     register: (userData: RegisteringUser) => Promise<void>;
+    login : (userData : LoggingUser) => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -41,6 +43,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [state, dispatch] = useReducer(authReducer, initialState);
     const { loading } = state;
+    const navigate = useNavigate();
 
     const register = async (registrationData : RegisteringUser) => {
         try {
@@ -62,11 +65,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
     };
 
+    const login = async (loginData : LoggingUser) => {
+        try {
+            dispatch({ type : "SET_LOADING", payload : true });
+            const response = await AuthService.login(loginData)
+
+            if (!response.success) {
+                throw new Error(response.message || 'Login failed');
+            }
+            dispatch({ type: 'SET_AUTHENTICATED_USER', payload: response.data });
+            navigate("/dashboard")
+        } catch (error) {
+            dispatch({ type : "SET_ERROR", payload : error instanceof Error ? error.message : 'Login failed' });
+            throw error;
+        }
+    }
+
     return (
         <AuthContext.Provider value={{ 
             ...state, 
             loading,
-            register 
+            register ,
+            login
         }}>
             {children}
         </AuthContext.Provider>
