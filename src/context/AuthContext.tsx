@@ -31,18 +31,52 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
     }
 }
 
-interface AuthContextType {
-    state: AuthState;
-    dispatch: React.Dispatch<AuthAction>;
+interface AuthContextType extends AuthState {
+    loading: boolean;
+    register: (fullname: string, email: string, password: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [state, dispatch] = useReducer(authReducer, initialState);
+    const { loading } = state;
+
+    const register = async (fullname: string, email: string, password: string) => {
+        try {
+            dispatch({ type: 'SET_LOADING', payload: true });
+            
+            // TODO: Replace with your actual registration API call
+            const response = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ fullname, email, password }),
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Registration failed');
+            }
+
+            const user = await response.json();
+            dispatch({ type: 'SET_AUTHENTICATED_USER', payload: user });
+        } catch (error) {
+            dispatch({ 
+                type: 'SET_ERROR', 
+                payload: error instanceof Error ? error.message : 'Registration failed' 
+            });
+            throw error;
+        }
+    };
 
     return (
-        <AuthContext.Provider value={{ state, dispatch }}>
+        <AuthContext.Provider value={{ 
+            ...state, 
+            loading,
+            register 
+        }}>
             {children}
         </AuthContext.Provider>
     );
