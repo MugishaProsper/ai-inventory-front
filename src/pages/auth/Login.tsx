@@ -3,22 +3,21 @@ import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { useAuth } from "@/context/AuthContext"
 
 const Login: React.FC = () => {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
-    const [loading, setLoading] = useState(false)
     
+    const { loading, login } = useAuth()
     const navigate = useNavigate()
 
     const handleLogin = async () => {
         try {
-            setLoading(true)
-            return;
+            await login(email, password)
+            navigate("/")
         } catch (error : any) {
             throw new Error(error)
-        } finally {
-            setLoading(false)
         }
     }
 

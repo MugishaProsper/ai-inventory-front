@@ -3,8 +3,11 @@ export interface LoggingUser{
     password : string
 }
 
-export interface RegisteringUser extends LoggingUser {
-    fullname : string
+export interface RegisteringUser {
+    fullname : string,
+    username : string,
+    email : string,
+    password : string
 }
 
 export interface User extends RegisteringUser {

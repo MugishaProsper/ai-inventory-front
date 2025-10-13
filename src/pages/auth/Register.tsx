@@ -5,26 +5,32 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
-
-interface FormErrors {
-  fullname?: string;
-  email?: string;
-  password?: string;
-}
+import { RegisteringUser } from "@/types/User";
 
 function Register() {
   const [formData, setFormData] = useState({
     fullname: '',
+    username : '',
     email: '',
     password: '',
     confirmPassword: ''
   });
-  const [errors, setErrors] = useState<FormErrors>({});
+  const [errors, setErrors] = useState<RegisteringUser>({
+    fullname: '',
+    username : '',
+    email: '',
+    password: ''
+  });
   const { loading, register } = useAuth();
   const navigate = useNavigate();
 
   const validateForm = (): boolean => {
-    const newErrors: FormErrors = {};
+    const newErrors: RegisteringUser = {
+        fullname: "",
+        username: "",
+        email: "",
+        password: ""
+    };
     
     if (!formData.fullname.trim()) {
       newErrors.fullname = 'Full name is required';
@@ -34,6 +40,10 @@ function Register() {
       newErrors.email = 'Email is required';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = 'Email is invalid';
+    }
+
+    if(!formData.username.trim()) {
+      newErrors.username = 'Username is required';
     }
     
     if (!formData.password) {
@@ -62,7 +72,7 @@ function Register() {
     if (!validateForm()) return;
     
     try {
-      await register(formData.fullname, formData.email, formData.password);
+      await register(formData);
       toast.success('Registration successful! Redirecting...');
       navigate('/login');
     } catch (error: any) {

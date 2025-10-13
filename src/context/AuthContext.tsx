@@ -1,4 +1,5 @@
-import { User } from "@/types/User";
+import AuthService from "@/services/auth.service";
+import { RegisteringUser, User } from "@/types/User";
 import React, { createContext, useContext, useReducer } from "react";
 
 interface AuthState {
@@ -32,8 +33,7 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
 }
 
 interface AuthContextType extends AuthState {
-    loading: boolean;
-    register: (fullname: string, email: string, password: string) => Promise<void>;
+    register: (userData: RegisteringUser) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -42,26 +42,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [state, dispatch] = useReducer(authReducer, initialState);
     const { loading } = state;
 
-    const register = async (fullname: string, email: string, password: string) => {
+    const register = async (registrationData : RegisteringUser) => {
         try {
             dispatch({ type: 'SET_LOADING', payload: true });
             
-            // TODO: Replace with your actual registration API call
-            const response = await fetch('/api/auth/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ fullname, email, password }),
-            });
+            const response = await AuthService.register(registrationData)
 
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || 'Registration failed');
+            if (!response.success) {
+                throw new Error(response.message || 'Registration failed');
             }
 
-            const user = await response.json();
-            dispatch({ type: 'SET_AUTHENTICATED_USER', payload: user });
+            // dispatch({ type: 'SET_AUTHENTICATED_USER', payload: response.data });
         } catch (error) {
             dispatch({ 
                 type: 'SET_ERROR', 
