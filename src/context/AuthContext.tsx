@@ -4,99 +4,121 @@ import React, { createContext, useContext, useReducer } from "react";
 import { useNavigate } from "react-router-dom";
 
 interface AuthState {
-    user: User | null;
-    loading: boolean;
-    error: string | null;
+  user: User | null;
+  loading: boolean;
+  error: string | null;
 }
 
 type AuthAction =
-    | { type: 'SET_LOADING'; payload: boolean }
-    | { type: 'SET_ERROR'; payload: string }
-    | { type: 'SET_AUTHENTICATED_USER'; payload: User }
+  | { type: "SET_LOADING"; payload: boolean }
+  | { type: "SET_ERROR"; payload: string }
+  | { type: "SET_AUTHENTICATED_USER"; payload: User | null };
 
 const initialState: AuthState = {
-    user: null,
-    loading: false,
-    error: null
+  user: null,
+  loading: false,
+  error: null,
 };
 
 function authReducer(state: AuthState, action: AuthAction): AuthState {
-    switch (action.type) {
-        case 'SET_LOADING':
-            return { ...state, loading: action.payload };
-        case 'SET_ERROR':
-            return { ...state, error: action.payload, loading: false };
-        case 'SET_AUTHENTICATED_USER':
-            return { ...state, user: action.payload, loading: false, error: null };
-        default:
-            return state;
-    }
+  switch (action.type) {
+    case "SET_LOADING":
+      return { ...state, loading: action.payload };
+    case "SET_ERROR":
+      return { ...state, error: action.payload, loading: false };
+    case "SET_AUTHENTICATED_USER":
+      return { ...state, user: action.payload, loading: false, error: null };
+    default:
+      return state;
+  }
 }
 
 interface AuthContextType extends AuthState {
-    register: (userData: RegisteringUser) => Promise<void>;
-    login : (userData : LoggingUser) => Promise<void>
+  register: (userData: RegisteringUser) => Promise<void>;
+  login: (userData: LoggingUser) => Promise<void>;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-    const [state, dispatch] = useReducer(authReducer, initialState);
-    const { loading } = state;
-    const navigate = useNavigate();
+  const [state, dispatch] = useReducer(authReducer, initialState);
+  const { loading } = state;
+  const navigate = useNavigate();
 
-    const register = async (registrationData : RegisteringUser) => {
-        try {
-            dispatch({ type: 'SET_LOADING', payload: true });
-            
-            const response = await AuthService.register(registrationData)
+  const register = async (registrationData: RegisteringUser) => {
+    try {
+      dispatch({ type: "SET_LOADING", payload: true });
 
-            if (!response.success) {
-                throw new Error(response.message || 'Registration failed');
-            }
+      const response = await AuthService.register(registrationData);
 
-            // dispatch({ type: 'SET_AUTHENTICATED_USER', payload: response.data });
-        } catch (error) {
-            dispatch({ 
-                type: 'SET_ERROR', 
-                payload: error instanceof Error ? error.message : 'Registration failed' 
-            });
-            throw error;
-        }
-    };
+      if (!response.success) {
+        throw new Error(response.message || "Registration failed");
+      }
 
-    const login = async (loginData : LoggingUser) => {
-        try {
-            dispatch({ type : "SET_LOADING", payload : true });
-            const response = await AuthService.login(loginData)
-
-            if (!response.success) {
-                throw new Error(response.message || 'Login failed');
-            }
-            dispatch({ type: 'SET_AUTHENTICATED_USER', payload: response.data });
-            navigate("/dashboard")
-        } catch (error) {
-            dispatch({ type : "SET_ERROR", payload : error instanceof Error ? error.message : 'Login failed' });
-            throw error;
-        }
+      // dispatch({ type: 'SET_AUTHENTICATED_USER', payload: response.data });
+    } catch (error) {
+      dispatch({
+        type: "SET_ERROR",
+        payload: error instanceof Error ? error.message : "Registration failed",
+      });
+      throw error;
     }
+  };
 
-    return (
-        <AuthContext.Provider value={{ 
-            ...state, 
-            loading,
-            register ,
-            login
-        }}>
-            {children}
-        </AuthContext.Provider>
-    );
+  const login = async (loginData: LoggingUser) => {
+    try {
+      dispatch({ type: "SET_LOADING", payload: true });
+      const response = await AuthService.login(loginData);
+
+      if (!response.success) {
+        throw new Error(response.message || "Login failed");
+      }
+      dispatch({ type: "SET_AUTHENTICATED_USER", payload: response.data });
+      navigate("/dashboard");
+    } catch (error) {
+      dispatch({
+        type: "SET_ERROR",
+        payload: error instanceof Error ? error.message : "Login failed",
+      });
+      throw error;
+    }
+  };
+
+  const logout = async () => {
+    try {
+      dispatch({ type: "SET_LOADING", payload: true });
+      await AuthService.logout();
+      dispatch({ type: "SET_AUTHENTICATED_USER", payload: null });
+      navigate("/login");
+    } catch (error) {
+      dispatch({
+        type: "SET_ERROR",
+        payload: error instanceof Error ? error.message : "Logout failed",
+      });
+      throw error;
+    }
+  };
+
+  return (
+    <AuthContext.Provider
+      value={{
+        ...state,
+        loading,
+        register,
+        login,
+        logout,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {
-    const context = useContext(AuthContext);
-    if (context === undefined) {
-        throw new Error('useAuth must be used within an AuthProvider');
-    }
-    return context;
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
 }

@@ -11,6 +11,7 @@ import {
   Settings,
   X,
   Sparkles,
+  MessageCircle,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -26,6 +27,7 @@ const navigation = [
   { name: 'Suppliers', href: '/suppliers', icon: Truck },
   { name: 'Analytics', href: '/analytics', icon: BarChart3 },
   { name: 'AI Insights', href: '/ai-insights', icon: Brain },
+    { name: 'Chat', href: '/chat', icon: MessageCircle },
   { name: 'Settings', href: '/settings', icon: Settings },
 ]
 
