@@ -72,11 +72,22 @@ function Register() {
     if (!validateForm()) return;
     
     try {
-      await register(formData);
-      toast.success('Registration successful! Redirecting...');
-      navigate('/login');
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Registration failed. Please try again.');
+      const result = await register({
+        fullname: formData.fullname,
+        username: formData.username,
+        email: formData.email,
+        password: formData.password
+      });
+      
+      if (result.success) {
+        toast.success('Registration successful! Please log in.');
+        navigate('/login');
+      } else {
+        toast.error(result.message || 'Registration failed. Please try again.');
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      toast.error('An unexpected error occurred. Please try again.');
     }
   };
 

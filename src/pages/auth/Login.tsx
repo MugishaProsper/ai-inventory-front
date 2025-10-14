@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { LoggingUser } from "@/types/User";
+import { toast } from "sonner";
 
 const Login: React.FC = () => {
   const [formData, setFormData] = useState<LoggingUser>({
@@ -25,11 +26,18 @@ const Login: React.FC = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(formData)
+    
     try {
-      await login(formData);
-    } catch (error: any) {
-      throw new Error(error);
+      const result = await login(formData);
+      if (result.success) {
+        toast.success('Login successful!');
+        navigate('/dashboard');
+      } else {
+        toast.error(result.message || 'Login failed. Please try again.');
+      }
+    } catch (error) {
+      toast.error('An unexpected error occurred. Please try again.');
+      console.error('Login error:', error);
     }
   };
 

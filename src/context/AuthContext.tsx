@@ -1,7 +1,6 @@
 import AuthService from "@/services/auth.service";
 import { LoggingUser, RegisteringUser, User } from "@/types/User";
 import React, { createContext, useContext, useReducer } from "react";
-import { useNavigate } from "react-router-dom";
 
 interface AuthState {
   user: User | null;
@@ -34,9 +33,9 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
 }
 
 interface AuthContextType extends AuthState {
-  register: (userData: RegisteringUser) => Promise<void>;
-  login: (userData: LoggingUser) => Promise<void>;
-  logout: () => Promise<void>;
+  register: (userData: RegisteringUser) => Promise<{ success: boolean; message?: string }>;
+  login: (userData: LoggingUser) => Promise<{ success: boolean; user?: User; message?: string }>;
+  logout: () => Promise<{ success: boolean; message?: string }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -44,29 +43,30 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(authReducer, initialState);
   const { loading } = state;
-  const navigate = useNavigate();
 
-  const register = async (registrationData: RegisteringUser) => {
+  const register = async (registrationData: RegisteringUser): Promise<{ success: boolean; message?: string }> => {
     try {
       dispatch({ type: "SET_LOADING", payload: true });
-
       const response = await AuthService.register(registrationData);
 
       if (!response.success) {
         throw new Error(response.message || "Registration failed");
       }
 
-      // dispatch({ type: 'SET_AUTHENTICATED_USER', payload: response.data });
+      return { success: true };
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Registration failed";
       dispatch({
         type: "SET_ERROR",
-        payload: error instanceof Error ? error.message : "Registration failed",
+        payload: errorMessage,
       });
-      throw error;
+      return { success: false, message: errorMessage };
+    } finally {
+      dispatch({ type: "SET_LOADING", payload: false });
     }
   };
 
-  const login = async (loginData: LoggingUser) => {
+  const login = async (loginData: LoggingUser): Promise<{ success: boolean; user?: User; message?: string }> => {
     try {
       dispatch({ type: "SET_LOADING", payload: true });
       const response = await AuthService.login(loginData);
@@ -74,29 +74,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!response.success) {
         throw new Error(response.message || "Login failed");
       }
+      
       dispatch({ type: "SET_AUTHENTICATED_USER", payload: response.data });
-      navigate("/dashboard");
+      return { success: true, user: response.data };
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Login failed";
       dispatch({
         type: "SET_ERROR",
-        payload: error instanceof Error ? error.message : "Login failed",
+        payload: errorMessage,
       });
-      throw error;
+      return { success: false, message: errorMessage };
+    } finally {
+      dispatch({ type: "SET_LOADING", payload: false });
     }
   };
 
-  const logout = async () => {
+  const logout = async (): Promise<{ success: boolean; message?: string }> => {
     try {
       dispatch({ type: "SET_LOADING", payload: true });
       await AuthService.logout();
       dispatch({ type: "SET_AUTHENTICATED_USER", payload: null });
-      navigate("/login");
+      return { success: true };
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Logout failed";
       dispatch({
         type: "SET_ERROR",
-        payload: error instanceof Error ? error.message : "Logout failed",
+        payload: errorMessage,
       });
-      throw error;
+      return { success: false, message: errorMessage };
+    } finally {
+      dispatch({ type: "SET_LOADING", payload: false });
     }
   };
 
