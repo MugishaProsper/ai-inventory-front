@@ -16,14 +16,6 @@ const Login: React.FC = () => {
   const { loading, login } = useAuth();
   const navigate = useNavigate();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -54,13 +46,13 @@ const Login: React.FC = () => {
             type="email"
             placeholder="Email"
             value={formData.email}
-            onChange={handleChange}
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
           />
           <Input
             type="password"
             placeholder="Password"
             value={formData.password}
-            onChange={handleChange}
+            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
           />
           <Button className="w-full" onClick={handleLogin} disabled={loading}>
             {loading ? "Logging in..." : "Login"}
