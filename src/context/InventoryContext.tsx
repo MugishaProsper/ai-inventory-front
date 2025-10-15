@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react'
 import { Product, Category, Supplier, StockMovement, DashboardStats, AIInsight, FilterOptions } from '@/types'
-import { mockProducts, mockCategories, mockSuppliers, mockStockMovements, mockDashboardStats, mockAIInsights } from '@/data/mockData'
+import { mockCategories, mockSuppliers, mockStockMovements, mockDashboardStats, mockAIInsights } from '@/data/mockData'
 import ProductService from '@/services/product.service'
 
 interface InventoryState {

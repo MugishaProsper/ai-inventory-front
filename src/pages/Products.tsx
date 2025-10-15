@@ -1,16 +1,16 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
-import { useInventory } from '@/context/InventoryContext'
+import { useProducts } from '@/context/ProductContext'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { 
-  Plus, 
-  Search, 
-  Filter, 
-  Grid3X3, 
-  List, 
+import {
+  Plus,
+  Search,
+  Filter,
+  Grid3X3,
+  List,
   Package,
   AlertTriangle,
   Eye,
@@ -21,12 +21,11 @@ import {
 import { formatCurrency, formatNumber } from '@/lib/utils'
 
 const Products: React.FC = () => {
-  const { state, getFilteredProducts } = useInventory()
-  const { loading } = state
+  const { products, loading } = useProducts()
   const [viewMode, setViewMode] = useState<'GRID' | 'LIST'>('GRID')
   const [searchTerm, setSearchTerm] = useState('')
 
-  const filteredProducts = getFilteredProducts()
+  const filteredProducts = products
 
   const getStockStatus = (product: any) => {
     if (product.quantity === 0) {
@@ -61,7 +60,7 @@ const Products: React.FC = () => {
               Manage your inventory with AI-powered insights
             </p>
           </div>
-          
+
           <div className="flex items-center space-x-3">
             <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
               <Plus className="mr-2 h-4 w-4" />
@@ -90,14 +89,14 @@ const Products: React.FC = () => {
                   className="pl-10"
                 />
               </div>
-              
+
               {/* Filters */}
               <div className="flex items-center space-x-2">
                 <Button variant="outline" size="sm">
                   <Filter className="mr-2 h-4 w-4" />
                   Filters
                 </Button>
-                
+
                 {/* View Mode */}
                 <div className="flex items-center bg-muted rounded-lg p-1">
                   <Button
@@ -119,7 +118,7 @@ const Products: React.FC = () => {
                 </div>
               </div>
             </div>
-            
+
             {/* Stats */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 pt-4 border-t border-border">
               <div className="text-center">
@@ -159,7 +158,7 @@ const Products: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredProducts.map((product, index) => {
               const stockStatus = getStockStatus(product)
-              
+
               return (
                 <motion.div
                   key={product.id}
@@ -183,7 +182,7 @@ const Products: React.FC = () => {
                           <Package className="h-12 w-12 text-muted-foreground" />
                         </div>
                       )}
-                      
+
                       {/* Stock Status Badge */}
                       <Badge
                         variant={stockStatus.variant}
@@ -191,7 +190,7 @@ const Products: React.FC = () => {
                       >
                         {stockStatus.label}
                       </Badge>
-                      
+
                       {/* Action Buttons */}
                       <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center space-x-2">
                         <Button size="sm" variant="secondary">
@@ -205,7 +204,7 @@ const Products: React.FC = () => {
                         </Button>
                       </div>
                     </div>
-                    
+
                     {/* Product Info */}
                     <CardContent className="p-4">
                       <div className="space-y-2">
@@ -217,11 +216,11 @@ const Products: React.FC = () => {
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </div>
-                        
+
                         <p className="text-sm text-muted-foreground">
                           SKU: {product.sku}
                         </p>
-                        
+
                         <div className="flex items-center justify-between">
                           <span className="text-lg font-bold text-foreground">
                             {formatCurrency(product.price)}
@@ -238,7 +237,7 @@ const Products: React.FC = () => {
                             )}
                           </div>
                         </div>
-                        
+
                         <div className="pt-2">
                           <Badge variant="outline" className="text-xs">
                             {product.category}
@@ -257,7 +256,7 @@ const Products: React.FC = () => {
               <div className="divide-y divide-border">
                 {filteredProducts.map((product, index) => {
                   const stockStatus = getStockStatus(product)
-                  
+
                   return (
                     <motion.div
                       key={product.id}
@@ -281,7 +280,7 @@ const Products: React.FC = () => {
                             </div>
                           )}
                         </div>
-                        
+
                         {/* Product Info */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between">
@@ -292,7 +291,7 @@ const Products: React.FC = () => {
                               {stockStatus.label}
                             </Badge>
                           </div>
-                          
+
                           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-2 text-sm">
                             <div>
                               <p className="text-muted-foreground">SKU</p>
@@ -312,7 +311,7 @@ const Products: React.FC = () => {
                             </div>
                           </div>
                         </div>
-                        
+
                         {/* Actions */}
                         <div className="flex items-center space-x-2">
                           <Button size="sm" variant="outline">

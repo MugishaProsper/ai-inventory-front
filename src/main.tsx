@@ -5,6 +5,8 @@ import { CategoriesProvider } from '@/context/CategoriesContext';
 import { SupplierProvider } from '@/context/SupplierContext';
 import { AnalyticsProvider } from '@/context/AnalyticsContext';
 import { AiInsightsProvider } from '@/context/AiInsightsContext';
+import { ProductProvider } from '@/context/ProductContext';
+import { SettingsProvider } from '@/context/SettingsContext';
 import App from './App';
 import './index.css';
 
@@ -15,7 +17,11 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         <CategoriesProvider>
           <SupplierProvider>
             <AiInsightsProvider>
-              <App />
+              <ProductProvider>
+                <SettingsProvider>
+                  <App />
+                </SettingsProvider>
+              </ProductProvider>
             </AiInsightsProvider>
           </SupplierProvider>
         </CategoriesProvider>
