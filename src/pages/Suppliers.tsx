@@ -72,7 +72,7 @@ const Suppliers: React.FC = () => {
                       )}
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center space-x-1">
                     <Button size="sm" variant="ghost" className="opacity-0 group-hover:opacity-100 transition-opacity">
                       <Edit className="h-4 w-4" />
@@ -83,7 +83,7 @@ const Suppliers: React.FC = () => {
                   </div>
                 </div>
               </CardHeader>
-              
+
               <CardContent className="space-y-4">
                 {/* Contact Info */}
                 <div className="grid grid-cols-1 gap-3">
@@ -106,7 +106,7 @@ const Suppliers: React.FC = () => {
                     </div>
                   )}
                 </div>
-                
+
                 {/* Stats */}
                 <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border">
                   <div className="text-center">
@@ -128,7 +128,7 @@ const Suppliers: React.FC = () => {
                     <p className="text-xs text-muted-foreground mt-1">Products</p>
                   </div>
                 </div>
-                
+
                 {/* Status */}
                 <div className="flex items-center justify-between pt-2">
                   <Badge variant="success">

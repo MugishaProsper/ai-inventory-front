@@ -1,27 +1,30 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { useInventory } from '@/context/InventoryContext'
+import { useAiInsights } from '@/context/AiInsightsContext'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Brain, TrendingUp, AlertTriangle, Target, Zap, RefreshCw } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
-import { AIInsight } from '@/types'
 
 const AIInsights: React.FC = () => {
-  const { state } = useInventory()
-  const { aiInsights, loading } = state
-  const [filter, setFilter] = useState<AIInsight["type"] | any>('ALL')
+  const { insights, loading, refresh } = useAiInsights()
+  const [filter, setFilter] = useState<string>('all')
+
+  useEffect(() => {
+    const params = filter === 'all' ? {} : { type: filter }
+    refresh(params)
+  }, [filter])
 
   const getInsightIcon = (type: string) => {
     switch (type) {
-      case 'DEMAND_FORECAST':
+      case 'demand_forecast':
         return TrendingUp
-      case 'REORDER_SUGGESTION':
+      case 'reorder_suggestion':
         return AlertTriangle
-      case 'TREND_ANALYSIS':
+      case 'trend_analysis':
         return Target
-      case 'ANOMALY_DETECTION':
+      case 'anomaly_detection':
         return Zap
       default:
         return Brain
@@ -30,41 +33,20 @@ const AIInsights: React.FC = () => {
 
   const getInsightColor = (type: string) => {
     switch (type) {
-      case 'DEMAND_FORECAST':
+      case 'demand_forecast':
         return 'from-blue-500 to-cyan-500'
-      case 'REORDER_SUGGESTION':
+      case 'reorder_suggestion':
         return 'from-red-500 to-orange-500'
-      case 'TREND_ANALYSIS':
+      case 'trend_analysis':
         return 'from-green-500 to-emerald-500'
-      case 'ANOMALY_DETECTION':
+      case 'anomaly_detection':
         return 'from-purple-500 to-pink-500'
       default:
         return 'from-gray-500 to-gray-600'
     }
   }
 
-  const getConfidenceColor = (confidence: number) => {
-    if (confidence >= 0.8) return 'bg-green-500'
-    if (confidence >= 0.6) return 'bg-yellow-500'
-    return 'bg-red-500'
-  }
-
-  const getInsightTypeLabel = (type: string) => {
-    switch (type) {
-      case 'DEMAND_FORECAST':
-        return 'Demand Forecast'
-      case 'REORDER_SUGGESTION':
-        return 'Reorder Alert'
-      case 'TREND_ANALYSIS':
-        return 'Trend Analysis'
-      case 'ANOMALY_DETECTION':
-        return 'Anomaly Detection'
-      default:
-        return 'AI Insight'
-    }
-  }
-
-  const filteredInsights = filter === 'ALL' ? aiInsights : aiInsights.filter(insight => insight.type === filter)
+  const filteredInsights = insights
 
   if (loading) {
     return (
@@ -94,15 +76,11 @@ const AIInsights: React.FC = () => {
               AI-powered recommendations and predictions for your inventory
             </p>
           </div>
-          
+
           <div className="flex items-center space-x-3">
-            <Button variant="outline">
+            <Button variant="outline" onClick={() => refresh()}>
               <RefreshCw className="mr-2 h-4 w-4" />
               Refresh Insights
-            </Button>
-            <Button className="bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700">
-              <Zap className="mr-2 h-4 w-4" />
-              Generate New
             </Button>
           </div>
         </div>
@@ -136,7 +114,7 @@ const AIInsights: React.FC = () => {
                   </Button>
                 ))}
               </div>
-              
+
               <div className="flex items-center space-x-4">
                 <Badge variant="secondary" className="animate-pulse">
                   {filteredInsights.length} insights
@@ -155,7 +133,7 @@ const AIInsights: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {filteredInsights.map((insight, index) => {
           const Icon = getInsightIcon(insight.type)
-          
+
           return (
             <motion.div
               key={insight.id}
@@ -167,7 +145,7 @@ const AIInsights: React.FC = () => {
               <Card className="group hover:shadow-lg transition-all duration-300 relative overflow-hidden">
                 {/* Background Gradient */}
                 <div className={`absolute inset-0 bg-gradient-to-r ${getInsightColor(insight.type)} opacity-5`} />
-                
+
                 <CardHeader className="pb-4 relative">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center space-x-3">
@@ -176,26 +154,28 @@ const AIInsights: React.FC = () => {
                       </div>
                       <div>
                         <Badge variant="outline" className="mb-2">
-                          {getInsightTypeLabel(insight.type)}
+                          {insight.type.replace('_', ' ')}
                         </Badge>
                         <CardTitle className="text-lg">{insight.title}</CardTitle>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center space-x-2">
-                      <div className={`w-3 h-3 rounded-full ${getConfidenceColor(insight.confidence)}`} />
+                      <div className={`w-3 h-3 rounded-full ${insight.confidence >= 0.8 ? 'bg-green-500' : insight.confidence >= 0.6 ? 'bg-yellow-500' : 'bg-red-500'}`} />
                       <span className="text-sm font-medium">
                         {Math.round(insight.confidence * 100)}%
                       </span>
                     </div>
                   </div>
                 </CardHeader>
-                
+
                 <CardContent className="space-y-4 relative">
-                  <p className="text-muted-foreground">
-                    {insight.description}
-                  </p>
-                  
+                  {insight.description && (
+                    <p className="text-muted-foreground">
+                      {insight.description}
+                    </p>
+                  )}
+
                   {/* Insight Data */}
                   {insight.data && (
                     <div className="bg-muted/50 rounded-lg p-4 space-y-2">
@@ -207,36 +187,21 @@ const AIInsights: React.FC = () => {
                               {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
                             </p>
                             <p className="font-medium text-foreground">
-                              {typeof value === 'number' ? 
-                                (key.includes('percentage') || key.includes('rate') ? `${value}%` : 
-                                 key.includes('days') || key.includes('time') ? `${value} days` : 
-                                 value) : 
-                                String(value)}
+                              {typeof value === 'number' ? value : String(value)}
                             </p>
                           </div>
                         ))}
                       </div>
                     </div>
                   )}
-                  
+
                   {/* Actions */}
                   <div className="flex items-center justify-between pt-4 border-t border-border">
                     <div className="flex items-center space-x-2">
-                      {insight.actionable && (
-                        <Badge variant="success">
-                          Actionable
-                        </Badge>
-                      )}
                       <span className="text-xs text-muted-foreground">
-                        {formatDate(insight.createdAt)}
+                        {insight.createdAt ? formatDate(new Date(insight.createdAt)) : ''}
                       </span>
                     </div>
-                    
-                    {insight.actionable && (
-                      <Button size="sm" className="group-hover:scale-105 transition-transform">
-                        Take Action
-                      </Button>
-                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -258,7 +223,7 @@ const AIInsights: React.FC = () => {
               <p className="text-muted-foreground mb-6">
                 The AI is analyzing your inventory data. Check back soon for new insights!
               </p>
-              <Button className="bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700">
+              <Button className="bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700" onClick={() => refresh()}>
                 <RefreshCw className="mr-2 h-4 w-4" />
                 Generate Insights
               </Button>

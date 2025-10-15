@@ -45,7 +45,7 @@ const Analytics: React.FC = () => {
               Comprehensive insights into your inventory performance
             </p>
           </div>
-          
+
           <div className="flex items-center space-x-3">
             <div className="flex items-center space-x-1 bg-muted rounded-lg p-1">
               {(['7d', '30d', '90d', '1y'] as const).map((range) => (
@@ -77,11 +77,11 @@ const Analytics: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[{
             title: 'Total Revenue', value: formatCurrency(summary?.monthlyRevenue ?? 0), change: `${summary?.monthlyRevenueChange ?? 0}%`, icon: DollarSign, color: 'text-green-600'
-          },{
+          }, {
             title: 'Units Sold', value: String(topProductsData.reduce((s, p) => s + (p.sales || 0), 0)), change: '+', icon: Package, color: 'text-blue-600'
-          },{
+          }, {
             title: 'Low Stock Items', value: String(summary?.lowStockItems ?? 0), change: '', icon: TrendingUp, color: 'text-purple-600'
-          },{
+          }, {
             title: 'Total Products', value: String(summary?.totalProducts ?? 0), change: '', icon: Users, color: 'text-orange-600'
           }].map((kpi, index) => (
             <motion.div

@@ -77,7 +77,7 @@ const Categories: React.FC = () => {
                       </p>
                     )}
                   </div>
-                  
+
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <Package className="h-4 w-4 text-muted-foreground" />
