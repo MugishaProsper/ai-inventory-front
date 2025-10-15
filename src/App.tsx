@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { InventoryProvider } from "@/context/InventoryContext";
 import Layout from "@/components/layout/Layout";
 import Dashboard from "@/pages/Dashboard";
@@ -10,69 +10,92 @@ import AIInsights from "@/pages/AIInsights";
 import Settings from "@/pages/Settings";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
+import { useAuth } from "@/context/AuthContext";
+
+function ProtectedRoute({ children }: { children: JSX.Element }) {
+  const { user, loading } = useAuth();
+  if (loading) return null;
+  if (!user) return <Navigate to="/login" replace />;
+  return children;
+}
 
 function App() {
   return (
     <InventoryProvider>
       <Router>
         <Routes>
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           {/* Protected routes */}
           <Route
             path="/dashboard"
             element={
-              <Layout>
-                <Dashboard />
-              </Layout>
+              <ProtectedRoute>
+                <Layout>
+                  <Dashboard />
+                </Layout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/products"
             element={
-              <Layout>
-                <Products />
-              </Layout>
+              <ProtectedRoute>
+                <Layout>
+                  <Products />
+                </Layout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/categories"
             element={
-              <Layout>
-                <Categories />
-              </Layout>
+              <ProtectedRoute>
+                <Layout>
+                  <Categories />
+                </Layout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/suppliers"
             element={
-              <Layout>
-                <Suppliers />
-              </Layout>
+              <ProtectedRoute>
+                <Layout>
+                  <Suppliers />
+                </Layout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/analytics"
             element={
-              <Layout>
-                <Analytics />
-              </Layout>
+              <ProtectedRoute>
+                <Layout>
+                  <Analytics />
+                </Layout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/ai-insights"
             element={
-              <Layout>
-                <AIInsights />
-              </Layout>
+              <ProtectedRoute>
+                <Layout>
+                  <AIInsights />
+                </Layout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/settings"
             element={
-              <Layout>
-                <Settings />
-              </Layout>
+              <ProtectedRoute>
+                <Layout>
+                  <Settings />
+                </Layout>
+              </ProtectedRoute>
             }
           />
         </Routes>
