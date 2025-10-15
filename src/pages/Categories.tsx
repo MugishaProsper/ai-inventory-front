@@ -1,14 +1,13 @@
 import React from 'react'
 import { motion } from 'framer-motion'
-import { useInventory } from '@/context/InventoryContext'
+import { useCategories } from '@/context/CategoriesContext'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Plus, Tags, Package, Edit, Trash2 } from 'lucide-react'
 
 const Categories: React.FC = () => {
-  const { state } = useInventory()
-  const { categories, loading } = state
+  const { categories, loading } = useCategories()
 
   if (loading) {
     return (

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -6,33 +6,29 @@ import { Badge } from '@/components/ui/badge'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import { BarChart3, TrendingUp, Download, DollarSign, Package, Users } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
+import { useAnalytics } from '@/context/AnalyticsContext'
 
 const Analytics: React.FC = () => {
   const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d' | '1y'>('30d')
+  const { dashboard, loading, refresh } = useAnalytics()
 
-  const salesData = [
-    { name: 'Jan', sales: 4000, revenue: 24000, profit: 8000 },
-    { name: 'Feb', sales: 3000, revenue: 18000, profit: 6000 },
-    { name: 'Mar', sales: 5000, revenue: 30000, profit: 10000 },
-    { name: 'Apr', sales: 4500, revenue: 27000, profit: 9000 },
-    { name: 'May', sales: 6000, revenue: 36000, profit: 12000 },
-    { name: 'Jun', sales: 5500, revenue: 33000, profit: 11000 },
-  ]
+  useEffect(() => {
+    const period = timeRange === '7d' ? '7d' : timeRange === '90d' ? '90d' : timeRange === '1y' ? '365d' : '30d'
+    refresh(period)
+  }, [timeRange])
 
-  const categoryData = [
-    { name: 'Electronics', value: 35, color: '#3b82f6' },
-    { name: 'Clothing', value: 25, color: '#10b981' },
-    { name: 'Books', value: 20, color: '#8b5cf6' },
-    { name: 'Home & Garden', value: 20, color: '#f59e0b' },
-  ]
+  const summary = dashboard?.summary
+  const dailyRevenue = dashboard?.charts.dailyRevenue ?? []
+  const categoryData = dashboard?.charts.categoryDistribution?.map((c) => ({ name: c.name, value: c.percentage, color: c.color })) ?? []
+  const topProductsData = dashboard?.topSellingProducts?.map((p) => ({ name: p.name, sales: p.totalSold, revenue: p.revenue })) ?? []
 
-  const topProductsData = [
-    { name: 'Wireless Headphones', sales: 145, revenue: 28900 },
-    { name: 'Smart Watch', sales: 98, revenue: 29400 },
-    { name: 'Cotton T-Shirt', sales: 234, revenue: 7020 },
-    { name: 'JavaScript Book', sales: 67, revenue: 2344 },
-    { name: 'Garden Hose', sales: 45, revenue: 2250 },
-  ]
+  if (loading || !dashboard) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -79,36 +75,15 @@ const Analytics: React.FC = () => {
         transition={{ duration: 0.3, delay: 0.1 }}
       >
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[
-            {
-              title: 'Total Revenue',
-              value: '$168,400',
-              change: '+12.5%',
-              icon: DollarSign,
-              color: 'text-green-600',
-            },
-            {
-              title: 'Units Sold',
-              value: '2,847',
-              change: '+8.2%',
-              icon: Package,
-              color: 'text-blue-600',
-            },
-            {
-              title: 'Avg Order Value',
-              value: '$59.20',
-              change: '+4.1%',
-              icon: TrendingUp,
-              color: 'text-purple-600',
-            },
-            {
-              title: 'Active Customers',
-              value: '1,247',
-              change: '+15.3%',
-              icon: Users,
-              color: 'text-orange-600',
-            },
-          ].map((kpi, index) => (
+          {[{
+            title: 'Total Revenue', value: formatCurrency(summary?.monthlyRevenue ?? 0), change: `${summary?.monthlyRevenueChange ?? 0}%`, icon: DollarSign, color: 'text-green-600'
+          },{
+            title: 'Units Sold', value: String(topProductsData.reduce((s, p) => s + (p.sales || 0), 0)), change: '+', icon: Package, color: 'text-blue-600'
+          },{
+            title: 'Low Stock Items', value: String(summary?.lowStockItems ?? 0), change: '', icon: TrendingUp, color: 'text-purple-600'
+          },{
+            title: 'Total Products', value: String(summary?.totalProducts ?? 0), change: '', icon: Users, color: 'text-orange-600'
+          }].map((kpi, index) => (
             <motion.div
               key={kpi.title}
               initial={{ opacity: 0, scale: 0.9 }}
@@ -152,15 +127,15 @@ const Analytics: React.FC = () => {
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <BarChart3 className="h-5 w-5" />
-                <span>Sales & Revenue Trends</span>
+                <span>Revenue Trend</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={salesData}>
+                  <BarChart data={dailyRevenue}>
                     <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                    <XAxis dataKey="name" />
+                    <XAxis dataKey="date" />
                     <YAxis />
                     <Tooltip
                       contentStyle={{
@@ -169,8 +144,7 @@ const Analytics: React.FC = () => {
                         borderRadius: '8px'
                       }}
                     />
-                    <Bar dataKey="sales" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="revenue" fill="hsl(var(--primary))" opacity={0.6} radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="value" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>

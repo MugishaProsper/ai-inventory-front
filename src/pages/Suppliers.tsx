@@ -1,14 +1,13 @@
 import React from 'react'
 import { motion } from 'framer-motion'
-import { useInventory } from '@/context/InventoryContext'
+import { useSuppliers } from '@/context/SupplierContext'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Plus, Truck, Star, Package, Phone, Mail, MapPin, Edit, Trash2 } from 'lucide-react'
 
 const Suppliers: React.FC = () => {
-  const { state } = useInventory()
-  const { suppliers, loading } = state
+  const { suppliers, loading } = useSuppliers()
 
   if (loading) {
     return (
@@ -18,7 +17,7 @@ const Suppliers: React.FC = () => {
     )
   }
 
-  const getRatingColor = (rating: number) => {
+  const getRatingColor = (rating: number = 0) => {
     if (rating >= 4.5) return 'text-green-500'
     if (rating >= 4.0) return 'text-yellow-500'
     return 'text-red-500'
@@ -66,9 +65,11 @@ const Suppliers: React.FC = () => {
                       <h3 className="font-semibold text-foreground text-lg">
                         {supplier.name}
                       </h3>
-                      <p className="text-sm text-muted-foreground">
-                        {supplier.contactPerson}
-                      </p>
+                      {supplier.email && (
+                        <p className="text-sm text-muted-foreground">
+                          {supplier.email}
+                        </p>
+                      )}
                     </div>
                   </div>
                   
@@ -86,18 +87,24 @@ const Suppliers: React.FC = () => {
               <CardContent className="space-y-4">
                 {/* Contact Info */}
                 <div className="grid grid-cols-1 gap-3">
-                  <div className="flex items-center space-x-3 text-sm">
-                    <Mail className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-foreground">{supplier.email}</span>
-                  </div>
-                  <div className="flex items-center space-x-3 text-sm">
-                    <Phone className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-foreground">{supplier.phone}</span>
-                  </div>
-                  <div className="flex items-start space-x-3 text-sm">
-                    <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
-                    <span className="text-foreground">{supplier.address}</span>
-                  </div>
+                  {supplier.email && (
+                    <div className="flex items-center space-x-3 text-sm">
+                      <Mail className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-foreground">{supplier.email}</span>
+                    </div>
+                  )}
+                  {supplier.phone && (
+                    <div className="flex items-center space-x-3 text-sm">
+                      <Phone className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-foreground">{supplier.phone}</span>
+                    </div>
+                  )}
+                  {supplier.address && (
+                    <div className="flex items-start space-x-3 text-sm">
+                      <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
+                      <span className="text-foreground">{supplier.address}</span>
+                    </div>
+                  )}
                 </div>
                 
                 {/* Stats */}
@@ -106,7 +113,7 @@ const Suppliers: React.FC = () => {
                     <div className="flex items-center justify-center space-x-1">
                       <Star className={`h-4 w-4 ${getRatingColor(supplier.rating)}`} />
                       <span className="font-semibold text-foreground">
-                        {supplier.rating}
+                        {supplier.rating ?? 0}
                       </span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">Rating</p>
@@ -115,7 +122,7 @@ const Suppliers: React.FC = () => {
                     <div className="flex items-center justify-center space-x-1">
                       <Package className="h-4 w-4 text-muted-foreground" />
                       <span className="font-semibold text-foreground">
-                        {supplier.productsSupplied}
+                        {supplier.productsSupplied ?? 0}
                       </span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">Products</p>
@@ -127,9 +134,11 @@ const Suppliers: React.FC = () => {
                   <Badge variant="success">
                     Active
                   </Badge>
-                  <span className="text-xs text-muted-foreground">
-                    Since {supplier.createdAt.toLocaleDateString()}
-                  </span>
+                  {supplier.createdAt && (
+                    <span className="text-xs text-muted-foreground">
+                      Since {supplier.createdAt.toLocaleDateString?.() || ''}
+                    </span>
+                  )}
                 </div>
               </CardContent>
             </Card>
