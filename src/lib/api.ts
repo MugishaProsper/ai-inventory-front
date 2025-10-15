@@ -1,34 +1,40 @@
 import axios from "axios";
 
+const baseURL =
+    typeof import.meta !== "undefined" && import.meta.env?.VITE_API_BASE_URL
+        ? import.meta.env.VITE_API_BASE_URL
+        : "http://localhost:5000/api";
+
 const api = axios.create({
-    baseURL : import.meta.env.VITE_API_BASE_URL,
-    withCredentials : true
+    baseURL,
+    withCredentials: true,
+    headers: {
+        "Content-Type": "application/json",
+    },
 });
 
 api.interceptors.request.use((config) => {
-    const token = localStorage.getItem('token')
+    const token = localStorage.getItem("token");
     if (token) {
-        config.headers.Authorization = `Bearer ${token}`
+        config.headers = config.headers ?? {};
+        (config.headers as any).Authorization = `Bearer ${token}`;
     }
-    return config
-})
+    return config;
+});
 
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        throw error
+        const status = error?.response?.status;
+        if (status === 401) {
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            if (window.location.pathname !== "/login") {
+                window.location.href = "/login";
+            }
+        }
+        return Promise.reject(error);
     }
 );
-
-// Refresh on 401
-api.interceptors.response.use(
-    (response) => response,
-    (error) => {
-        if (error.response.status === 401) {
-            localStorage.removeItem('token')
-            window.location.href = '/login'
-        }
-    }
-)
 
 export default api

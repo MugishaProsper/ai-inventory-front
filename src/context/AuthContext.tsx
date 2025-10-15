@@ -1,6 +1,7 @@
 import AuthService from "@/services/auth.service";
 import { LoggingUser, RegisteringUser, User } from "@/types/User";
-import React, { createContext, useContext, useReducer } from "react";
+import React, { createContext, useContext, useEffect, useReducer } from "react";
+import { ApiResponse } from "@/types/api.types";
 
 interface AuthState {
   user: User | null;
@@ -44,6 +45,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(authReducer, initialState);
   const { loading } = state;
 
+  // Hydrate session on mount
+  useEffect(() => {
+    let isMounted = true;
+    (async () => {
+      try {
+        dispatch({ type: "SET_LOADING", payload: true });
+        const me: ApiResponse<User> = await AuthService.getCurrentUser();
+        if (isMounted && me?.success && me?.data) {
+          dispatch({ type: "SET_AUTHENTICATED_USER", payload: me.data });
+          // optionally cache user
+          localStorage.setItem("user", JSON.stringify(me.data));
+        }
+      } catch {
+        // not authenticated is fine
+      } finally {
+        if (isMounted) dispatch({ type: "SET_LOADING", payload: false });
+      }
+    })();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const register = async (registrationData: RegisteringUser): Promise<{ success: boolean; message?: string }> => {
     try {
       dispatch({ type: "SET_LOADING", payload: true });
@@ -70,11 +94,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       dispatch({ type: "SET_LOADING", payload: true });
       const response = await AuthService.login(loginData);
-
-      if (!response.success) {
+      if (!response.success || !response.data) {
         throw new Error(response.message || "Login failed");
       }
-      
+      localStorage.setItem("user", JSON.stringify(response.data));
       dispatch({ type: "SET_AUTHENTICATED_USER", payload: response.data });
       return { success: true, user: response.data };
     } catch (error) {
@@ -94,6 +117,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       dispatch({ type: "SET_LOADING", payload: true });
       await AuthService.logout();
       dispatch({ type: "SET_AUTHENTICATED_USER", payload: null });
+      localStorage.removeItem("user");
       return { success: true };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Logout failed";

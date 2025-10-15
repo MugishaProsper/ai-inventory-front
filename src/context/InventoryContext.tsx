@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react'
 import { Product, Category, Supplier, StockMovement, DashboardStats, AIInsight, FilterOptions } from '@/types'
 import { mockProducts, mockCategories, mockSuppliers, mockStockMovements, mockDashboardStats, mockAIInsights } from '@/data/mockData'
+import ProductService from '@/services/product.service'
 
 interface InventoryState {
   products: Product[]
@@ -107,18 +108,29 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
 
   // Initialize data
   useEffect(() => {
-    dispatch({ type: 'SET_LOADING', payload: true })
-    
-    // Simulate API calls
-    setTimeout(() => {
-      dispatch({ type: 'SET_PRODUCTS', payload: mockProducts })
-      dispatch({ type: 'SET_CATEGORIES', payload: mockCategories })
-      dispatch({ type: 'SET_SUPPLIERS', payload: mockSuppliers })
-      dispatch({ type: 'SET_STOCK_MOVEMENTS', payload: mockStockMovements })
-      dispatch({ type: 'SET_DASHBOARD_STATS', payload: mockDashboardStats })
-      dispatch({ type: 'SET_AI_INSIGHTS', payload: mockAIInsights })
-      dispatch({ type: 'SET_LOADING', payload: false })
-    }, 1000)
+    let isMounted = true
+      ; (async () => {
+        try {
+          dispatch({ type: 'SET_LOADING', payload: true })
+          const productsRes = await ProductService.list({ page: 1, limit: 20 })
+          if (isMounted && productsRes.success) {
+            dispatch({ type: 'SET_PRODUCTS', payload: productsRes.data })
+          }
+          // Keep mock placeholders for other domains until services are implemented
+          dispatch({ type: 'SET_CATEGORIES', payload: mockCategories })
+          dispatch({ type: 'SET_SUPPLIERS', payload: mockSuppliers })
+          dispatch({ type: 'SET_STOCK_MOVEMENTS', payload: mockStockMovements })
+          dispatch({ type: 'SET_DASHBOARD_STATS', payload: mockDashboardStats })
+          dispatch({ type: 'SET_AI_INSIGHTS', payload: mockAIInsights })
+        } catch (e: any) {
+          dispatch({ type: 'SET_ERROR', payload: e?.message || 'Failed to load inventory' })
+        } finally {
+          if (isMounted) dispatch({ type: 'SET_LOADING', payload: false })
+        }
+      })()
+    return () => {
+      isMounted = false
+    }
   }, [])
 
   const addProduct = (productData: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) => {
@@ -151,10 +163,10 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
     // Update product quantity
     const product = state.products.find(p => p.id === movementData.productId)
     if (product) {
-      const newQuantity = movementData.type === 'IN' 
+      const newQuantity = movementData.type === 'IN'
         ? product.quantity + movementData.quantity
         : product.quantity - movementData.quantity
-      
+
       updateProduct({ ...product, quantity: Math.max(0, newQuantity) })
     }
   }
@@ -203,7 +215,7 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
       filtered.sort((a, b) => {
         const aValue = (a as any)[state.filters.sortBy!]
         const bValue = (b as any)[state.filters.sortBy!]
-        
+
         if (state.filters.sortOrder === 'DESC') {
           return bValue > aValue ? 1 : -1
         }
