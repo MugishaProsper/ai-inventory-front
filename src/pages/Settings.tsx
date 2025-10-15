@@ -4,21 +4,23 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { 
-  Settings as SettingsIcon, 
-  User, 
-  Bell, 
-  Shield, 
-  Database, 
+import {
+  Settings as SettingsIcon,
+  User,
+  Bell,
+  Shield,
+  Database,
   Palette,
   Moon,
   Sun,
   Globe,
-} from 'lucide-react'
+} from 'lucide-react';
+import { useAuth } from '@/context/AuthContext'
 
 const Settings: React.FC = () => {
   const [activeTab, setActiveTab] = useState('PROFILE')
   const [isDarkMode, setIsDarkMode] = useState(false)
+  const { user } = useAuth();
 
   const tabs = [
     { id: 'PROFILE', label: 'Profile', icon: User },
@@ -43,37 +45,37 @@ const Settings: React.FC = () => {
                     <label className="text-sm font-medium text-foreground mb-2 block">
                       First Name
                     </label>
-                    <Input defaultValue="John" />
+                    <Input defaultValue={`${user?.fullname.split(' ')[0]}`} />
                   </div>
                   <div>
                     <label className="text-sm font-medium text-foreground mb-2 block">
                       Last Name
                     </label>
-                    <Input defaultValue="Doe" />
+                    <Input defaultValue={`${user?.fullname.split(' ')[1]}`} />
                   </div>
                 </div>
-                
+
                 <div>
                   <label className="text-sm font-medium text-foreground mb-2 block">
                     Email Address
                   </label>
-                  <Input type="email" defaultValue="john.doe@inventrika.com" />
+                  <Input type="email" defaultValue={`${user?.email}`} />
                 </div>
-                
+
                 <div>
                   <label className="text-sm font-medium text-foreground mb-2 block">
                     Phone Number
                   </label>
-                  <Input type="tel" defaultValue="+1 (555) 123-4567" />
+                  <Input type="tel" defaultValue={user?.phone_number ? `${user?.phone_number}` : ''} />
                 </div>
-                
+
                 <div>
                   <label className="text-sm font-medium text-foreground mb-2 block">
                     Address
                   </label>
                   <Input defaultValue="123 Business St, City, State 12345" />
                 </div>
-                
+
                 <Button className="w-full md:w-auto">
                   Save Changes
                 </Button>
@@ -81,7 +83,7 @@ const Settings: React.FC = () => {
             </Card>
           </div>
         )
-      
+
       case 'NOTIFICATIONS':
         return (
           <div className="space-y-6">
@@ -112,7 +114,7 @@ const Settings: React.FC = () => {
             </Card>
           </div>
         )
-      
+
       case 'SECURITY':
         return (
           <div className="space-y-6">
@@ -127,25 +129,25 @@ const Settings: React.FC = () => {
                   </label>
                   <Input type="password" placeholder="Enter current password" />
                 </div>
-                
+
                 <div>
                   <label className="text-sm font-medium text-foreground mb-2 block">
                     New Password
                   </label>
                   <Input type="password" placeholder="Enter new password" />
                 </div>
-                
+
                 <div>
                   <label className="text-sm font-medium text-foreground mb-2 block">
                     Confirm New Password
                   </label>
                   <Input type="password" placeholder="Confirm new password" />
                 </div>
-                
+
                 <Button>Update Password</Button>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardHeader>
                 <CardTitle>Two-Factor Authentication</CardTitle>
@@ -165,7 +167,7 @@ const Settings: React.FC = () => {
             </Card>
           </div>
         )
-      
+
       case 'APPEARANCE':
         return (
           <div className="space-y-6">
@@ -200,7 +202,7 @@ const Settings: React.FC = () => {
                     Toggle
                   </Button>
                 </div>
-                
+
                 <div className="grid grid-cols-3 gap-4">
                   {['Blue', 'Purple', 'Green'].map((color) => (
                     <div
@@ -216,7 +218,7 @@ const Settings: React.FC = () => {
             </Card>
           </div>
         )
-      
+
       case 'DATA':
         return (
           <div className="space-y-6">
@@ -235,7 +237,7 @@ const Settings: React.FC = () => {
                     Import Data
                   </Button>
                 </div>
-                
+
                 <div className="p-4 bg-muted rounded-lg">
                   <h4 className="font-medium text-foreground mb-2">Backup Settings</h4>
                   <p className="text-sm text-muted-foreground mb-4">
@@ -252,7 +254,7 @@ const Settings: React.FC = () => {
             </Card>
           </div>
         )
-      
+
       default:
         return null
     }
@@ -292,11 +294,10 @@ const Settings: React.FC = () => {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`w-full flex items-center space-x-3 px-4 py-3 text-left transition-colors ${
-                      activeTab === tab.id
+                    className={`w-full flex items-center space-x-3 px-4 py-3 text-left transition-colors ${activeTab === tab.id
                         ? 'bg-primary text-primary-foreground'
                         : 'hover:bg-accent text-foreground'
-                    }`}
+                      }`}
                   >
                     <tab.icon className="h-5 w-5" />
                     <span className="font-medium">{tab.label}</span>

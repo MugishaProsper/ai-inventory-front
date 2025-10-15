@@ -1,5 +1,5 @@
 import api from "@/lib/api";
-import { ApiResponse, PaginatedResponse } from "@/types/api.types";
+import { PaginatedResponse } from "@/types/api.types";
 import { Product } from "@/types";
 
 type BackendProduct = any; // If backend types are added later, replace any with exact shape
@@ -45,6 +45,7 @@ const ProductService = {
   async list(params: ProductListParams = {}): Promise<PaginatedResponse<Product>> {
     const response = await api.get("/products", { params });
     const data = response.data;
+    console.log(data.data)
     const items: Product[] = Array.isArray(data.data) ? data.data.map(mapBackendProduct) : [];
     return {
       success: !!data.success,
