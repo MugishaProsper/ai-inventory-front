@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { Edit, ArrowLeft, Mail, Phone, Globe, User, MapPin, Image as ImageIcon } from 'lucide-react'
+import { Edit, ArrowLeft, Mail, Phone, Globe, User, MapPin, Image as ImageIcon, Cross, Pencil, X } from 'lucide-react'
 import { useSuppliers } from '@/context/SupplierContext'
 import SupplierService from '@/services/supplier.service'
 
@@ -133,135 +133,13 @@ const SupplierView: React.FC = () => {
             <h1 className="text-2xl font-semibold text-foreground">Supplier Details</h1>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Name */}
-          <div className="flex items-center justify-between">
-            <div className="text-sm text-muted-foreground">Name</div>
-            <div className="flex items-center gap-2">
-              {!editing.name ? (
-                <>
-                  <div className="text-foreground font-medium">{form.name}</div>
-                  <button onClick={() => startEdit('name')} className="p-1 rounded hover:bg-muted"><Edit className="w-4 h-4" /></button>
-                </>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <Input value={form.name || ''} onChange={(e) => setForm(prev => ({ ...prev, name: e.target.value }))} className="w-64" />
-                  <button onClick={() => cancelEdit('name')} className="p-1 rounded hover:bg-red-100">Cancel</button>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Contact */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Email */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-muted-foreground"><Mail className="w-4 h-4" /><span className="text-sm">Email</span></div>
-              {!editing.email ? (
-                <div className="flex items-center gap-2">
-                  <div className="text-foreground font-medium">{form.email}</div>
-                  <button onClick={() => startEdit('email')} className="p-1 rounded hover:bg-muted"><Edit className="w-4 h-4" /></button>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <Input value={form.email || ''} onChange={(e) => setForm(prev => ({ ...prev, email: e.target.value }))} className="w-64" />
-                  <button onClick={() => cancelEdit('email')} className="p-1 rounded hover:bg-red-100">Cancel</button>
-                </div>
-              )}
-            </div>
-            {/* Phone */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-muted-foreground"><Phone className="w-4 h-4" /><span className="text-sm">Phone</span></div>
-              {!editing.phone ? (
-                <div className="flex items-center gap-2">
-                  <div className="text-foreground font-medium">{form.phone}</div>
-                  <button onClick={() => startEdit('phone')} className="p-1 rounded hover:bg-muted"><Edit className="w-4 h-4" /></button>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <Input value={form.phone || ''} onChange={(e) => setForm(prev => ({ ...prev, phone: e.target.value }))} className="w-64" />
-                  <button onClick={() => cancelEdit('phone')} className="p-1 rounded hover:bg-red-100">Cancel</button>
-                </div>
-              )}
-            </div>
-            {/* Website */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-muted-foreground"><Globe className="w-4 h-4" /><span className="text-sm">Website</span></div>
-              {!editing.website ? (
-                <div className="flex items-center gap-2">
-                  <div className="text-foreground font-medium break-all">{form.website}</div>
-                  <button onClick={() => startEdit('website')} className="p-1 rounded hover:bg-muted"><Edit className="w-4 h-4" /></button>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <Input value={form.website || ''} onChange={(e) => setForm(prev => ({ ...prev, website: e.target.value }))} className="w-64" />
-                  <button onClick={() => cancelEdit('website')} className="p-1 rounded hover:bg-red-100">Cancel</button>
-                </div>
-              )}
-            </div>
-            {/* Contact Person */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-muted-foreground"><User className="w-4 h-4" /><span className="text-sm">Contact Person</span></div>
-              {!editing.contactPerson ? (
-                <div className="flex items-center gap-2">
-                  <div className="text-foreground font-medium">{form.contactPerson}</div>
-                  <button onClick={() => startEdit('contactPerson')} className="p-1 rounded hover:bg-muted"><Edit className="w-4 h-4" /></button>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <Input value={form.contactPerson || ''} onChange={(e) => setForm(prev => ({ ...prev, contactPerson: e.target.value }))} className="w-64" />
-                  <button onClick={() => cancelEdit('contactPerson')} className="p-1 rounded hover:bg-red-100">Cancel</button>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Address */}
-          <div className="pt-4">
-            <div className="flex items-center gap-2 text-muted-foreground"><MapPin className="w-4 h-4" /><span className="text-sm">Address</span></div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
-              {(['street', 'city', 'state'] as EditableKey[]).map((key) => (
-                <div key={key} className="flex items-center justify-between">
-                  <div className="text-sm text-muted-foreground capitalize">{key}</div>
-                  {!editing[key] ? (
-                    <div className="flex items-center gap-2">
-                      <div className="text-foreground font-medium">{form[key]}</div>
-                      <button onClick={() => startEdit(key)} className="p-1 rounded hover:bg-muted"><Edit className="w-4 h-4" /></button>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <Input value={form[key] || ''} onChange={(e) => setForm(prev => ({ ...prev, [key]: e.target.value }))} className="w-48" />
-                      <button onClick={() => cancelEdit(key)} className="p-1 rounded hover:bg-red-100">Cancel</button>
-                    </div>
-                  )}
-                </div>
-              ))}
-              {(['zipCode', 'country'] as EditableKey[]).map((key) => (
-                <div key={key} className="flex items-center justify-between">
-                  <div className="text-sm text-muted-foreground capitalize">{key}</div>
-                  {!editing[key] ? (
-                    <div className="flex items-center gap-2">
-                      <div className="text-foreground font-medium">{form[key]}</div>
-                      <button onClick={() => startEdit(key)} className="p-1 rounded hover:bg-muted"><Edit className="w-4 h-4" /></button>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <Input value={form[key] || ''} onChange={(e) => setForm(prev => ({ ...prev, [key]: e.target.value }))} className="w-48" />
-                      <button onClick={() => cancelEdit(key)} className="p-1 rounded hover:bg-red-100">Cancel</button>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-
+        <CardContent className="space-y-4 flex flex-row items-center justify-between w-full h-full gap-2">
           {/* Logo upload */}
-          <div className="pt-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-muted-foreground"><ImageIcon className="w-4 h-4" /><span className="text-sm">Logo</span></div>
-              <div className="flex items-center gap-3">
+          <div className="pt-4 w-full h-full border">
+            <div className="flex flex-col items-center justify-between">
+              <div className="flex flex-col items-center gap-3">
                 {(logoPreview || supplier?.logo) && (
-                  <img src={logoPreview || supplier.logo} alt="logo" className="w-16 h-16 object-cover rounded border" />
+                  <img src={logoPreview || supplier.logo} alt="logo" className="w-81 h-81 object-cover" />
                 )}
                 <input
                   type="file"
@@ -276,14 +154,211 @@ const SupplierView: React.FC = () => {
                       setLogoPreview(null)
                     }
                   }}
+                  className='border'
                 />
               </div>
             </div>
           </div>
+          <div className='flex flex-col items-center w-full h-full pt-4'>
+            {/* Name */}
+            <div className="flex flex-row items-center justify-between w-full gap-2 border rounded px-2">
+              <div className="text-sm text-muted-foreground">Name: </div>
+              <div className="flex items-center gap-2 p-2 w-full rounded">
+                {!editing.name ? (
+                  <>
+                    <Input
+                      value={form.name}
+                      className="w-full"
+                      disabled={true}
+                    />
+                    <button
+                      onClick={() => startEdit('name')}
+                      className="p-2 rounded hover:bg-muted"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Input
+                      value={form.name || ''}
+                      onChange={(e) => setForm(prev => ({ ...prev, name: e.target.value }))}
+                      className="w-full"
+                    />
+                    <button
+                      onClick={() => cancelEdit('name')}
+                      className="p-2 rounded hover:bg-muted"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
 
-          {/* Save all */}
-          <div className="flex justify-end pt-4">
-            <Button onClick={saveAll} disabled={saving}>Save Changes</Button>
+            {/* Contact */}
+            <div className="grid grid-cols-1 md:grid-cols-1 gap-4 w-full border rounded px-2 py-2">
+              {/* Email */}
+              <div className="flex items-center justify-between rounded w-full gap-2">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Mail className="w-6 h-6" />
+                </div>
+                {!editing.email ? (
+                  <>
+                    <Input
+                      value={form.email || ''}
+                      className="w-full"
+                      disabled={true}
+                    />
+                    <button
+                      onClick={() => startEdit('email')}
+                      className="p-2 rounded hover:bg-muted"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Input
+                      value={form.email || ''}
+                      onChange={(e) => setForm(prev => ({ ...prev, email: e.target.value }))}
+                      className="w-full"
+                    />
+                    <button
+                      onClick={() => cancelEdit('email')}
+                      className="p-2 rounded hover:bg-muted"
+                    >
+                      <X className='w-4 h-4' />
+                    </button>
+                  </>
+                )}
+              </div>
+              {/* Phone */}
+              <div className="flex items-center justify-between rounded w-full gap-2">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Phone className="w-6 h-6" />
+                </div>
+                {!editing.phone ? (
+                  <>
+                    <Input
+                      value={form.phone}
+                      className="w-full"
+                      disabled={true}
+                    />
+                    <button
+                      onClick={() => startEdit('phone')}
+                      className="p-2 rounded hover:bg-muted"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Input
+                      value={form.phone || ''}
+                      onChange={(e) => setForm(prev => ({ ...prev, phone: e.target.value }))}
+                      className="w-full" />
+                    <button
+                      onClick={() => cancelEdit('phone')}
+                      className="p-2 rounded hover:bg-muted">
+                      <X className="w-4 h-4" />
+                    </button>
+                  </>
+                )}
+              </div>
+              {/* Website */}
+              <div className="flex items-center justify-between rounded w-full gap-2">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Globe className="w-6 h-6" />
+                </div>
+                {!editing.website ? (
+                  <>
+                    <Input
+                      value={form.website}
+                      className="w-full"
+                    />
+                    <button
+                      onClick={() => startEdit('website')}
+                      className="p-2 rounded hover:bg-muted"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Input
+                      value={form.website}
+                      onChange={(e) => setForm(prev => ({ ...prev, website: e.target.value }))}
+                      className="w-full"
+                    />
+                    <button
+                      onClick={() => cancelEdit('website')}
+                      className="p-2 rounded hover:muted"
+                    >
+                      <X className='w-4 h-4' />
+                    </button>
+                  </>
+                )}
+              </div>
+              {/* Contact Person */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-muted-foreground"><User className="w-4 h-4" /><span className="text-sm">Contact Person</span></div>
+                {!editing.contactPerson ? (
+                  <div className="flex items-center gap-2">
+                    <div className="text-foreground font-medium">{form.contactPerson}</div>
+                    <button onClick={() => startEdit('contactPerson')} className="p-1 rounded hover:bg-muted"><Edit className="w-4 h-4" /></button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <Input value={form.contactPerson || ''} onChange={(e) => setForm(prev => ({ ...prev, contactPerson: e.target.value }))} className="w-64" />
+                    <button onClick={() => cancelEdit('contactPerson')} className="p-1 rounded hover:bg-red-100">Cancel</button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Address */}
+            <div className="pt-4">
+              <div className="flex items-center gap-2 text-muted-foreground"><MapPin className="w-4 h-4" /><span className="text-sm">Address</span></div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
+                {(['street', 'city', 'state'] as EditableKey[]).map((key) => (
+                  <div key={key} className="flex items-center justify-between">
+                    <div className="text-sm text-muted-foreground capitalize">{key}</div>
+                    {!editing[key] ? (
+                      <div className="flex items-center gap-2">
+                        <div className="text-foreground font-medium">{form[key]}</div>
+                        <button onClick={() => startEdit(key)} className="p-1 rounded hover:bg-muted"><Edit className="w-4 h-4" /></button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <Input value={form[key] || ''} onChange={(e) => setForm(prev => ({ ...prev, [key]: e.target.value }))} className="w-48" />
+                        <button onClick={() => cancelEdit(key)} className="p-1 rounded hover:bg-red-100">Cancel</button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+                {(['zipCode', 'country'] as EditableKey[]).map((key) => (
+                  <div key={key} className="flex items-center justify-between">
+                    <div className="text-sm text-muted-foreground capitalize">{key}</div>
+                    {!editing[key] ? (
+                      <div className="flex items-center gap-2">
+                        <div className="text-foreground font-medium">{form[key]}</div>
+                        <button onClick={() => startEdit(key)} className="p-1 rounded hover:bg-muted"><Edit className="w-4 h-4" /></button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <Input value={form[key] || ''} onChange={(e) => setForm(prev => ({ ...prev, [key]: e.target.value }))} className="w-48" />
+                        <button onClick={() => cancelEdit(key)} className="p-1 rounded hover:bg-red-100">Cancel</button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+            {/* Save all */}
+            <div className="flex justify-end pt-4">
+              <Button onClick={saveAll} disabled={saving}>Save Changes</Button>
+            </div>
           </div>
         </CardContent>
       </Card>
