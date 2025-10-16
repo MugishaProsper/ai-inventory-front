@@ -60,6 +60,24 @@ const ProductService = {
       },
     };
   },
+  async create(payload: Partial<Product>): Promise<ApiResponse<Product>> {
+    const response = await api.post("/products", payload);
+    const data = response.data;
+    return {
+      success: !!data.success,
+      message: data.message ?? "",
+      data: mapBackendProduct(data.data),
+    };
+  },
+  async update(productId: string, payload: Partial<Product>): Promise<ApiResponse<Product>> {
+    const response = await api.put(`/products/${productId}`, payload);
+    const data = response.data;
+    return {
+      success: !!data.success,
+      message: data.message ?? "",
+      data: mapBackendProduct(data.data),
+    };
+  },
 };
 
 export default ProductService;

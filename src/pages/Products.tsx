@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useProducts } from '@/context/ProductContext'
 import { Card, CardContent } from '@/components/ui/card'
@@ -21,9 +21,87 @@ import {
 import { formatCurrency, formatNumber } from '@/lib/utils'
 
 const Products: React.FC = () => {
-  const { products, loading } = useProducts()
+  const { products, loading, createProduct, updateProduct } = useProducts()
   const [viewMode, setViewMode] = useState<'GRID' | 'LIST'>('GRID')
   const [searchTerm, setSearchTerm] = useState('')
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [form, setForm] = useState({
+    name: '',
+    sku: '',
+    category: '',
+    description: '',
+    price: '',
+    cost: '',
+    quantity: '',
+    minStock: '',
+    maxStock: '',
+    supplier: '',
+    location: '',
+    imageUrl: ''
+  })
+
+  const editingProduct = useMemo(() => products.find(p => p.id === editingId), [products, editingId])
+
+  const openAddModal = () => {
+    setEditingId(null)
+    setForm({
+      name: '', sku: '', category: '', description: '', price: '', cost: '', quantity: '', minStock: '', maxStock: '', supplier: '', location: '', imageUrl: ''
+    })
+    setIsModalOpen(true)
+  }
+
+  const openEditModal = (id: string) => {
+    setEditingId(id)
+    const p = products.find(x => x.id === id)
+    if (p) {
+      setForm({
+        name: p.name ?? '',
+        sku: p.sku ?? '',
+        category: p.category ?? '',
+        description: p.description ?? '',
+        price: String(p.price ?? ''),
+        cost: String(p.cost ?? ''),
+        quantity: String(p.quantity ?? ''),
+        minStock: String(p.minStock ?? ''),
+        maxStock: String(p.maxStock ?? ''),
+        supplier: p.supplier ?? '',
+        location: p.location ?? '',
+        imageUrl: p.imageUrl ?? ''
+      })
+    }
+    setIsModalOpen(true)
+  }
+
+  const closeModal = () => setIsModalOpen(false)
+
+  const handleChange = (field: string, value: string) => {
+    setForm(prev => ({ ...prev, [field]: value }))
+  }
+
+  const handleSubmit = async () => {
+    const payload = {
+      name: form.name,
+      sku: form.sku,
+      category: form.category,
+      description: form.description,
+      price: form.price ? parseFloat(form.price) : undefined,
+      cost: form.cost ? parseFloat(form.cost) : undefined,
+      quantity: form.quantity ? parseInt(form.quantity) : undefined,
+      minStock: form.minStock ? parseInt(form.minStock) : undefined,
+      maxStock: form.maxStock ? parseInt(form.maxStock) : undefined,
+      supplier: form.supplier,
+      location: form.location,
+      imageUrl: form.imageUrl
+    }
+
+    if (editingId) {
+      await updateProduct(editingId, payload)
+    } else {
+      await createProduct(payload)
+    }
+    setIsModalOpen(false)
+  }
 
   const filteredProducts = products
 
@@ -62,7 +140,7 @@ const Products: React.FC = () => {
           </div>
 
           <div className="flex items-center space-x-3">
-            <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
+            <Button onClick={openAddModal} className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
               <Plus className="mr-2 h-4 w-4" />
               Add Product
             </Button>
@@ -196,7 +274,7 @@ const Products: React.FC = () => {
                         <Button size="sm" variant="secondary">
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button size="sm" variant="secondary">
+                        <Button size="sm" variant="secondary" onClick={() => openEditModal(product.id)}>
                           <Edit className="h-4 w-4" />
                         </Button>
                         <Button size="sm" variant="destructive">
@@ -333,6 +411,72 @@ const Products: React.FC = () => {
           </Card>
         )}
       </motion.div>
+
+      {/* Add/Edit Modal (inline) */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/50" onClick={closeModal} />
+          <div className="relative w-full max-w-3xl mx-auto bg-background text-foreground rounded-lg shadow-lg p-6">
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold">{editingId ? 'Edit Product' : 'Add Product'}</h3>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="mb-1 block">Name</label>
+                <Input value={form.name} onChange={(e) => handleChange('name', e.target.value)} />
+              </div>
+              <div>
+                <label className="mb-1 block">SKU</label>
+                <Input value={form.sku} onChange={(e) => handleChange('sku', e.target.value)} />
+              </div>
+              <div>
+                <label className="mb-1 block">Category</label>
+                <Input value={form.category} onChange={(e) => handleChange('category', e.target.value)} />
+              </div>
+              <div>
+                <label className="mb-1 block">Supplier</label>
+                <Input value={form.supplier} onChange={(e) => handleChange('supplier', e.target.value)} />
+              </div>
+              <div className="md:col-span-2">
+                <label className="mb-1 block">Description</label>
+                <Input value={form.description} onChange={(e) => handleChange('description', e.target.value)} />
+              </div>
+              <div>
+                <label className="mb-1 block">Price</label>
+                <Input type="number" value={form.price} onChange={(e) => handleChange('price', e.target.value)} />
+              </div>
+              <div>
+                <label className="mb-1 block">Cost</label>
+                <Input type="number" value={form.cost} onChange={(e) => handleChange('cost', e.target.value)} />
+              </div>
+              <div>
+                <label className="mb-1 block">Quantity</label>
+                <Input type="number" value={form.quantity} onChange={(e) => handleChange('quantity', e.target.value)} />
+              </div>
+              <div>
+                <label className="mb-1 block">Min Stock</label>
+                <Input type="number" value={form.minStock} onChange={(e) => handleChange('minStock', e.target.value)} />
+              </div>
+              <div>
+                <label className="mb-1 block">Max Stock</label>
+                <Input type="number" value={form.maxStock} onChange={(e) => handleChange('maxStock', e.target.value)} />
+              </div>
+              <div>
+                <label className="mb-1 block">Location</label>
+                <Input value={form.location} onChange={(e) => handleChange('location', e.target.value)} />
+              </div>
+              <div className="md:col-span-2">
+                <label className="mb-1 block">Image URL</label>
+                <Input value={form.imageUrl} onChange={(e) => handleChange('imageUrl', e.target.value)} />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 pt-4">
+              <Button variant="outline" onClick={closeModal}>Cancel</Button>
+              <Button onClick={handleSubmit}>{editingId ? 'Update' : 'Create'}</Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

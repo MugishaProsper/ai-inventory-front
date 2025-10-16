@@ -20,8 +20,13 @@ const UserService = {
     const res = await api.get("/users");
     return res.data;
   },
-  async updateProfile(userId: string, payload: Partial<BackendUser>): Promise<{ success: boolean; message: string }> {
-    const res = await api.put(`/users/${userId}`, payload);
+  async updateProfile(payload: Partial<BackendUser>): Promise<{ success: boolean; message: string }> {
+    // Backend updateUser uses req.user.id (authenticated user), not req.params.userId
+    const res = await api.put("/users/me", payload);
+    return res.data;
+  },
+  async changePassword(currentPassword: string, newPassword: string): Promise<{ success: boolean; message: string }> {
+    const res = await api.put("/users/change-password", { oldPassword: currentPassword, newPassword: newPassword });
     return res.data;
   },
 };

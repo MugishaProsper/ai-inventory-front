@@ -39,6 +39,7 @@ function settingsReducer(state: SettingsState, action: SettingsAction): Settings
 interface SettingsContextType extends SettingsState {
   refreshProfile: () => Promise<void>
   updateProfile: (payload: Partial<BackendUser>) => Promise<void>
+  changePassword: (currentPassword: string, newPassword: string) => Promise<void>
   toggleDarkMode: () => void
 }
 
@@ -60,8 +61,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   }
 
   const updateProfile = async (payload: Partial<BackendUser>) => {
-    if (!state.profile) return
-    await UserService.updateProfile(state.profile._id, payload)
+    await UserService.updateProfile(payload)
     await refreshProfile()
   }
 
@@ -76,7 +76,15 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   return (
-    <SettingsContext.Provider value={{ ...state, refreshProfile, updateProfile, toggleDarkMode }}>
+    <SettingsContext.Provider value={{
+      ...state,
+      refreshProfile,
+      updateProfile,
+      toggleDarkMode,
+      changePassword: async (currentPassword: string, newPassword: string) => {
+        await UserService.changePassword(currentPassword, newPassword)
+      }
+    }}>
       {children}
     </SettingsContext.Provider>
   )

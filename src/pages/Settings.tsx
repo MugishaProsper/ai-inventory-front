@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -15,12 +15,91 @@ import {
   Sun,
   Globe,
 } from 'lucide-react';
-import { useAuth } from '@/context/AuthContext'
+import { useSettings } from '@/context/SettingsContext'
 
 const Settings: React.FC = () => {
   const [activeTab, setActiveTab] = useState('PROFILE')
-  const [isDarkMode, setIsDarkMode] = useState(false)
-  const { user } = useAuth();
+  const { profile, loading, darkMode, updateProfile, toggleDarkMode, changePassword } = useSettings();
+
+  // Profile form state
+  const [profileForm, setProfileForm] = useState({
+    fullname: '',
+    email: '',
+    phone_number: '',
+    address: ''
+  });
+
+  // Password form state
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+
+  const [isSaving, setIsSaving] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
+
+  // Populate form when profile loads
+  useEffect(() => {
+    if (profile) {
+      setProfileForm({
+        fullname: profile.fullname || '',
+        email: profile.email || '',
+        phone_number: profile.phone_number?.toString() || '',
+        address: profile.address || ''
+      });
+    }
+  }, [profile]);
+
+  // Profile form handlers
+  const handleProfileChange = (field: string, value: string) => {
+    setProfileForm(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleProfileSave = async () => {
+    setIsSaving(true);
+    try {
+      // Convert phone_number string to number for backend
+      const profileData = {
+        ...profileForm,
+        phone_number: profileForm.phone_number ? parseInt(profileForm.phone_number) : undefined
+      };
+      await updateProfile(profileData);
+      // Show success message (you can add toast notification here)
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Password form handlers
+  const handlePasswordChange = (field: string, value: string) => {
+    setPasswordForm(prev => ({ ...prev, [field]: value }));
+    setPasswordError(''); // Clear error when user types
+  };
+
+  const handlePasswordUpdate = async () => {
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setPasswordError('Passwords do not match');
+      return;
+    }
+    if (passwordForm.newPassword.length < 6) {
+      setPasswordError('Password must be at least 6 characters');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      await changePassword(passwordForm.currentPassword, passwordForm.newPassword);
+      setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      // Show success message
+    } catch (error: any) {
+      setPasswordError(error?.response?.data?.message || 'Failed to update password');
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const tabs = [
     { id: 'PROFILE', label: 'Profile', icon: User },
@@ -40,44 +119,58 @@ const Settings: React.FC = () => {
                 <CardTitle>Personal Information</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium text-foreground mb-2 block">
-                      First Name
-                    </label>
-                    <Input defaultValue={`${user?.fullname.split(' ')[0]}`} />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-foreground mb-2 block">
-                      Last Name
-                    </label>
-                    <Input defaultValue={`${user?.fullname.split(' ')[1]}`} />
-                  </div>
+                <div>
+                  <label className="text-sm font-medium text-foreground mb-2 block">
+                    Full Name
+                  </label>
+                  <Input
+                    value={profileForm.fullname}
+                    onChange={(e) => handleProfileChange('fullname', e.target.value)}
+                    placeholder="Enter your full name"
+                  />
                 </div>
 
                 <div>
                   <label className="text-sm font-medium text-foreground mb-2 block">
                     Email Address
                   </label>
-                  <Input type="email" defaultValue={`${user?.email}`} />
+                  <Input
+                    type="email"
+                    value={profileForm.email}
+                    onChange={(e) => handleProfileChange('email', e.target.value)}
+                    placeholder="Enter your email"
+                  />
                 </div>
 
                 <div>
                   <label className="text-sm font-medium text-foreground mb-2 block">
                     Phone Number
                   </label>
-                  <Input type="tel" defaultValue={user?.phone_number ? `${user?.phone_number}` : ''} />
+                  <Input
+                    type="tel"
+                    value={profileForm.phone_number}
+                    onChange={(e) => handleProfileChange('phone_number', e.target.value)}
+                    placeholder="Enter your phone number"
+                  />
                 </div>
 
                 <div>
                   <label className="text-sm font-medium text-foreground mb-2 block">
                     Address
                   </label>
-                  <Input defaultValue="123 Business St, City, State 12345" />
+                  <Input
+                    value={profileForm.address}
+                    onChange={(e) => handleProfileChange('address', e.target.value)}
+                    placeholder="Enter your address"
+                  />
                 </div>
 
-                <Button className="w-full md:w-auto">
-                  Save Changes
+                <Button
+                  className="w-full md:w-auto"
+                  onClick={handleProfileSave}
+                  disabled={isSaving || loading}
+                >
+                  {isSaving ? 'Saving...' : 'Save Changes'}
                 </Button>
               </CardContent>
             </Card>
@@ -123,28 +216,54 @@ const Settings: React.FC = () => {
                 <CardTitle>Security Settings</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+                {passwordError && (
+                  <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+                    <p className="text-sm text-red-600">{passwordError}</p>
+                  </div>
+                )}
+
                 <div>
                   <label className="text-sm font-medium text-foreground mb-2 block">
                     Current Password
                   </label>
-                  <Input type="password" placeholder="Enter current password" />
+                  <Input
+                    type="password"
+                    value={passwordForm.currentPassword}
+                    onChange={(e) => handlePasswordChange('currentPassword', e.target.value)}
+                    placeholder="Enter current password"
+                  />
                 </div>
 
                 <div>
                   <label className="text-sm font-medium text-foreground mb-2 block">
                     New Password
                   </label>
-                  <Input type="password" placeholder="Enter new password" />
+                  <Input
+                    type="password"
+                    value={passwordForm.newPassword}
+                    onChange={(e) => handlePasswordChange('newPassword', e.target.value)}
+                    placeholder="Enter new password"
+                  />
                 </div>
 
                 <div>
                   <label className="text-sm font-medium text-foreground mb-2 block">
                     Confirm New Password
                   </label>
-                  <Input type="password" placeholder="Confirm new password" />
+                  <Input
+                    type="password"
+                    value={passwordForm.confirmPassword}
+                    onChange={(e) => handlePasswordChange('confirmPassword', e.target.value)}
+                    placeholder="Confirm new password"
+                  />
                 </div>
 
-                <Button>Update Password</Button>
+                <Button
+                  onClick={handlePasswordUpdate}
+                  disabled={isSaving}
+                >
+                  {isSaving ? 'Updating...' : 'Update Password'}
+                </Button>
               </CardContent>
             </Card>
 
@@ -178,14 +297,14 @@ const Settings: React.FC = () => {
               <CardContent className="space-y-6">
                 <div className="flex items-center justify-between p-4 border border-border rounded-lg">
                   <div className="flex items-center space-x-3">
-                    {isDarkMode ? (
+                    {darkMode ? (
                       <Moon className="h-5 w-5 text-foreground" />
                     ) : (
                       <Sun className="h-5 w-5 text-foreground" />
                     )}
                     <div>
                       <p className="font-medium text-foreground">
-                        {isDarkMode ? 'Dark Mode' : 'Light Mode'}
+                        {darkMode ? 'Dark Mode' : 'Light Mode'}
                       </p>
                       <p className="text-sm text-muted-foreground">
                         Choose your preferred theme
@@ -194,10 +313,7 @@ const Settings: React.FC = () => {
                   </div>
                   <Button
                     variant="outline"
-                    onClick={() => {
-                      setIsDarkMode(!isDarkMode)
-                      document.documentElement.classList.toggle('dark')
-                    }}
+                    onClick={toggleDarkMode}
                   >
                     Toggle
                   </Button>
@@ -295,8 +411,8 @@ const Settings: React.FC = () => {
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
                     className={`w-full flex items-center space-x-3 px-4 py-3 text-left transition-colors ${activeTab === tab.id
-                        ? 'bg-primary text-primary-foreground'
-                        : 'hover:bg-accent text-foreground'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'hover:bg-accent text-foreground'
                       }`}
                   >
                     <tab.icon className="h-5 w-5" />

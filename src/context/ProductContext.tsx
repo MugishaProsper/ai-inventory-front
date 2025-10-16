@@ -34,6 +34,8 @@ function productReducer(state: ProductState, action: ProductAction): ProductStat
 
 interface ProductContextType extends ProductState {
   refresh: (params?: { page?: number; limit?: number; search?: string }) => Promise<void>
+  createProduct: (payload: Partial<Product>) => Promise<void>
+  updateProduct: (productId: string, payload: Partial<Product>) => Promise<void>
 }
 
 const ProductContext = createContext<ProductContextType | undefined>(undefined)
@@ -53,12 +55,22 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  const createProduct = async (payload: Partial<Product>) => {
+    await ProductService.create(payload)
+    await load()
+  }
+
+  const updateProduct = async (productId: string, payload: Partial<Product>) => {
+    await ProductService.update(productId, payload)
+    await load()
+  }
+
   useEffect(() => {
     load()
   }, [])
 
   return (
-    <ProductContext.Provider value={{ ...state, refresh: load }}>
+    <ProductContext.Provider value={{ ...state, refresh: load, createProduct, updateProduct }}>
       {children}
     </ProductContext.Provider>
   )
