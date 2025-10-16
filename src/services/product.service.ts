@@ -60,7 +60,22 @@ const ProductService = {
       },
     };
   },
-  async create(payload: Partial<Product>): Promise<ApiResponse<Product>> {
+  async create(payload: Partial<Product>, files?: File[]): Promise<ApiResponse<Product>> {
+    // Use multipart when files are present
+    if (files && files.length) {
+      const form = new FormData();
+      Object.entries(payload).forEach(([k, v]) => {
+        if (v !== undefined && v !== null) form.append(k, String(v));
+      });
+      files.slice(0, 10).forEach(f => form.append('images', f));
+      const response = await api.post("/products", form, { headers: { 'Content-Type': 'multipart/form-data' } });
+      const data = response.data;
+      return {
+        success: !!data.success,
+        message: data.message ?? "",
+        data: mapBackendProduct(data.data),
+      };
+    }
     const response = await api.post("/products", payload);
     const data = response.data;
     return {
@@ -69,7 +84,21 @@ const ProductService = {
       data: mapBackendProduct(data.data),
     };
   },
-  async update(productId: string, payload: Partial<Product>): Promise<ApiResponse<Product>> {
+  async update(productId: string, payload: Partial<Product>, files?: File[]): Promise<ApiResponse<Product>> {
+    if (files && files.length) {
+      const form = new FormData();
+      Object.entries(payload).forEach(([k, v]) => {
+        if (v !== undefined && v !== null) form.append(k, String(v));
+      });
+      files.slice(0, 10).forEach(f => form.append('images', f));
+      const response = await api.put(`/products/${productId}`, form, { headers: { 'Content-Type': 'multipart/form-data' } });
+      const data = response.data;
+      return {
+        success: !!data.success,
+        message: data.message ?? "",
+        data: mapBackendProduct(data.data),
+      };
+    }
     const response = await api.put(`/products/${productId}`, payload);
     const data = response.data;
     return {

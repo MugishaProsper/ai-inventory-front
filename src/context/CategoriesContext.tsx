@@ -34,6 +34,7 @@ function categoriesReducer(state: CategoriesState, action: CategoriesAction): Ca
 
 interface CategoriesContextType extends CategoriesState {
   refresh: () => Promise<void>
+  createCategory: (payload: { name: string; description?: string; color?: string }) => Promise<void>
 }
 
 const CategoriesContext = createContext<CategoriesContextType | undefined>(undefined)
@@ -53,12 +54,17 @@ export function CategoriesProvider({ children }: { children: React.ReactNode }) 
     }
   }
 
+  const createCategory = async (payload: { name: string; description?: string; color?: string }) => {
+    await CategoryService.create(payload)
+    await load()
+  }
+
   useEffect(() => {
     load()
   }, [])
 
   return (
-    <CategoriesContext.Provider value={{ ...state, refresh: load }}>
+    <CategoriesContext.Provider value={{ ...state, refresh: load, createCategory }}>
       {children}
     </CategoriesContext.Provider>
   )

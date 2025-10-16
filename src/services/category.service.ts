@@ -43,6 +43,15 @@ const CategoryService = {
       },
     };
   },
+  async create(payload: { name: string; description?: string; color?: string }): Promise<ApiResponse<Category>> {
+    const response = await api.post("/categories", payload);
+    const data = response.data;
+    return {
+      success: !!data.success,
+      message: data.message ?? "",
+      data: mapBackendCategory(data.data),
+    };
+  },
 };
 
 export default CategoryService;

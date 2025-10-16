@@ -1,13 +1,21 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useCategories } from '@/context/CategoriesContext'
+import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Plus, Tags, Package, Edit, Trash2 } from 'lucide-react'
 
 const Categories: React.FC = () => {
-  const { categories, loading } = useCategories()
+  const { categories, loading, createCategory } = useCategories()
+  const [open, setOpen] = useState(false)
+  const [form, setForm] = useState({ name: '', description: '', color: '#3b82f6' })
+  const submit = async () => {
+    await createCategory({ name: form.name, description: form.description, color: form.color })
+    setOpen(false)
+    setForm({ name: '', description: '', color: '#3b82f6' })
+  }
 
   if (loading) {
     return (
@@ -32,7 +40,7 @@ const Categories: React.FC = () => {
               Organize your products into categories
             </p>
           </div>
-          <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
+          <Button onClick={() => setOpen(true)} className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
             <Plus className="mr-2 h-4 w-4" />
             Add Category
           </Button>
@@ -95,6 +103,36 @@ const Categories: React.FC = () => {
           </motion.div>
         ))}
       </div>
+
+      {/* Add Category Modal */}
+      {open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setOpen(false)} />
+          <div className="relative w-full max-w-lg mx-auto bg-background text-foreground rounded-lg shadow-lg p-6">
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold">Add Category</h3>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="mb-1 block">Name</label>
+                <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+              </div>
+              <div>
+                <label className="mb-1 block">Description</label>
+                <Input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+              </div>
+              <div>
+                <label className="mb-1 block">Color</label>
+                <input type="color" value={form.color} onChange={(e) => setForm({ ...form, color: e.target.value })} />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 pt-4">
+              <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+              <Button onClick={submit} disabled={!form.name.trim()}>Create</Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

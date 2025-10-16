@@ -3,6 +3,7 @@ import { InventoryProvider } from "@/context/InventoryContext";
 import Layout from "@/components/layout/Layout";
 import Dashboard from "@/pages/Dashboard";
 import Products from "@/pages/Products";
+import ProductForm from "@/pages/ProductForm";
 import Categories from "@/pages/Categories";
 import Suppliers from "@/pages/Suppliers";
 import Analytics from "@/pages/Analytics";
@@ -44,6 +45,26 @@ function App() {
               <ProtectedRoute>
                 <Layout>
                   <Products />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/products/new"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <ProductForm />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/products/:productId/edit"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <ProductForm />
                 </Layout>
               </ProtectedRoute>
             }
