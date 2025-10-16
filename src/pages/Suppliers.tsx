@@ -23,26 +23,25 @@ const Suppliers: React.FC = () => {
     contactPerson: '',
     street: '', city: '', state: '', zipCode: '', country: ''
   })
-  const [images, setImages] = useState<File[]>([])
-  const [previews, setPreviews] = useState<string[]>([])
+  const [logo, setLogo] = useState<File | null>(null)
+  const [logoPreview, setLogoPreview] = useState<string | null>(null)
 
   useEffect(() => {
-    // build preview urls
-    const urls = images.map(file => URL.createObjectURL(file))
-    setPreviews(urls)
-    return () => {
-      urls.forEach(u => URL.revokeObjectURL(u))
-    }
-  }, [images])
+    if (!logo) { setLogoPreview(null); return; }
+    const url = URL.createObjectURL(logo)
+    setLogoPreview(url)
+    return () => URL.revokeObjectURL(url)
+  }, [logo])
   const submit = async () => {
-    await createSupplier({
-      name: form.name,
-      contact: { email: form.email, phone: form.phone, website: form.website, contactPerson: form.contactPerson },
-      address: { street: form.street, city: form.city, state: form.state, zipCode: form.zipCode, country: form.country }
-    })
+    const fd = new FormData()
+    fd.append('name', form.name)
+    fd.append('contact', JSON.stringify({ email: form.email, phone: form.phone, website: form.website, contactPerson: form.contactPerson }))
+    fd.append('address', JSON.stringify({ street: form.street, city: form.city, state: form.state, zipCode: form.zipCode, country: form.country }))
+    if (logo) fd.append('logo', logo)
+    await createSupplier(fd)
     setOpen(false)
     setForm({ name: '', email: '', phone: '', website: '', contactPerson: '', street: '', city: '', state: '', zipCode: '', country: '' })
-    setImages([])
+    setLogo(null)
   }
 
   if (loading) {
@@ -216,39 +215,11 @@ const Suppliers: React.FC = () => {
               </div>
               <div className="md:col-span-2"><hr className="my-2 border-border" /></div>
               <div className="md:col-span-2">
-                <label className="mb-1 block">Images (max 10)</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={(e) => {
-                    const files = Array.from(e.target.files || []) as File[]
-                    const limited = [...images, ...files].slice(0, 10)
-                    setImages(limited)
-                  }}
-                />
-                {previews.length > 0 && (
-                  <div className="mt-3 grid grid-cols-3 gap-3">
-                    {previews.map((src, idx) => (
-                      <div key={src} className="relative group">
-                        <img src={src} alt={`preview-${idx}`} className="w-full h-24 object-cover rounded" />
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const next = images.filter((_, i) => i !== idx)
-                            setImages(next)
-                          }}
-                          className="absolute top-1 right-1 bg-black/60 text-white text-xs rounded px-1 opacity-0 group-hover:opacity-100"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                {images.length > 0 && (
-                  <div className="mt-2 flex justify-end">
-                    <button type="button" className="text-sm text-muted-foreground underline" onClick={() => setImages([])}>Clear all</button>
+                <label className="mb-1 block">Logo</label>
+                <input type="file" accept="image/*" onChange={(e) => setLogo((e.target.files?.[0] as File) || null)} />
+                {logoPreview && (
+                  <div className="mt-3">
+                    <img src={logoPreview} alt="logo-preview" className="w-24 h-24 object-cover rounded border" />
                   </div>
                 )}
               </div>

@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { Edit, Check, X, ArrowLeft, Mail, Phone, Globe, User, MapPin } from 'lucide-react'
+import { Edit, ArrowLeft, Mail, Phone, Globe, User, MapPin, Image as ImageIcon } from 'lucide-react'
 import { useSuppliers } from '@/context/SupplierContext'
 import SupplierService from '@/services/supplier.service'
 
@@ -19,7 +19,9 @@ const SupplierView: React.FC = () => {
   const [supplier, setSupplier] = useState<any>(fromList || null)
   const [editing, setEditing] = useState<Partial<Record<EditableKey, boolean>>>({})
   const [form, setForm] = useState<{ [k in EditableKey]?: string }>({})
-  const [savingKey, setSavingKey] = useState<EditableKey | null>(null)
+  const [saving, setSaving] = useState<boolean>(false)
+  const [logoFile, setLogoFile] = useState<File | null>(null)
+  const [logoPreview, setLogoPreview] = useState<string | null>(null)
 
   useEffect(() => {
     (async () => {
@@ -71,36 +73,38 @@ const SupplierView: React.FC = () => {
     setForm(prev => ({ ...prev, [key]: current[key] }))
   }
 
-  const saveField = async (key: EditableKey) => {
+  const saveAll = async () => {
     if (!supplierId) return
-    setSavingKey(key)
+    setSaving(true)
     try {
-      const payload: any = {}
-      if (key === 'name') payload.name = form.name
-      if (['email', 'phone', 'website', 'contactPerson'].includes(key)) {
-        payload.contact = {
-          email: form.email,
-          phone: form.phone,
-          website: form.website,
-          contactPerson: form.contactPerson,
-        }
+      const fd = new FormData()
+      if (logoFile) fd.append('logo', logoFile)
+      if (form.name !== undefined) fd.append('name', form.name || '')
+      const contact = {
+        email: form.email || '',
+        phone: form.phone || '',
+        website: form.website || '',
+        contactPerson: form.contactPerson || ''
       }
-      if (['street', 'city', 'state', 'zipCode', 'country'].includes(key)) {
-        payload.address = {
-          street: form.street,
-          city: form.city,
-          state: form.state,
-          zipCode: form.zipCode,
-          country: form.country,
-        }
+      fd.append('contact', JSON.stringify(contact))
+      const address = {
+        street: form.street || '',
+        city: form.city || '',
+        state: form.state || '',
+        zipCode: form.zipCode || '',
+        country: form.country || ''
       }
-      await updateSupplier(supplierId, payload)
+      fd.append('address', JSON.stringify(address))
+
+      await updateSupplier(supplierId, fd)
       await refresh()
       const res = await SupplierService.getById(supplierId)
       setSupplier(res.data)
-      setEditing(prev => ({ ...prev, [key]: false }))
+      setEditing({})
+      setLogoFile(null)
+      setLogoPreview(null)
     } finally {
-      setSavingKey(null)
+      setSaving(false)
     }
   }
 
@@ -142,8 +146,7 @@ const SupplierView: React.FC = () => {
               ) : (
                 <div className="flex items-center gap-2">
                   <Input value={form.name || ''} onChange={(e) => setForm(prev => ({ ...prev, name: e.target.value }))} className="w-64" />
-                  <button disabled={savingKey === 'name'} onClick={() => saveField('name')} className="p-1 rounded hover:bg-green-100"><Check className="w-4 h-4" /></button>
-                  <button onClick={() => cancelEdit('name')} className="p-1 rounded hover:bg-red-100"><X className="w-4 h-4" /></button>
+                  <button onClick={() => cancelEdit('name')} className="p-1 rounded hover:bg-red-100">Cancel</button>
                 </div>
               )}
             </div>
@@ -162,8 +165,7 @@ const SupplierView: React.FC = () => {
               ) : (
                 <div className="flex items-center gap-2">
                   <Input value={form.email || ''} onChange={(e) => setForm(prev => ({ ...prev, email: e.target.value }))} className="w-64" />
-                  <button disabled={savingKey === 'email'} onClick={() => saveField('email')} className="p-1 rounded hover:bg-green-100"><Check className="w-4 h-4" /></button>
-                  <button onClick={() => cancelEdit('email')} className="p-1 rounded hover:bg-red-100"><X className="w-4 h-4" /></button>
+                  <button onClick={() => cancelEdit('email')} className="p-1 rounded hover:bg-red-100">Cancel</button>
                 </div>
               )}
             </div>
@@ -178,8 +180,7 @@ const SupplierView: React.FC = () => {
               ) : (
                 <div className="flex items-center gap-2">
                   <Input value={form.phone || ''} onChange={(e) => setForm(prev => ({ ...prev, phone: e.target.value }))} className="w-64" />
-                  <button disabled={savingKey === 'phone'} onClick={() => saveField('phone')} className="p-1 rounded hover:bg-green-100"><Check className="w-4 h-4" /></button>
-                  <button onClick={() => cancelEdit('phone')} className="p-1 rounded hover:bg-red-100"><X className="w-4 h-4" /></button>
+                  <button onClick={() => cancelEdit('phone')} className="p-1 rounded hover:bg-red-100">Cancel</button>
                 </div>
               )}
             </div>
@@ -194,8 +195,7 @@ const SupplierView: React.FC = () => {
               ) : (
                 <div className="flex items-center gap-2">
                   <Input value={form.website || ''} onChange={(e) => setForm(prev => ({ ...prev, website: e.target.value }))} className="w-64" />
-                  <button disabled={savingKey === 'website'} onClick={() => saveField('website')} className="p-1 rounded hover:bg-green-100"><Check className="w-4 h-4" /></button>
-                  <button onClick={() => cancelEdit('website')} className="p-1 rounded hover:bg-red-100"><X className="w-4 h-4" /></button>
+                  <button onClick={() => cancelEdit('website')} className="p-1 rounded hover:bg-red-100">Cancel</button>
                 </div>
               )}
             </div>
@@ -210,8 +210,7 @@ const SupplierView: React.FC = () => {
               ) : (
                 <div className="flex items-center gap-2">
                   <Input value={form.contactPerson || ''} onChange={(e) => setForm(prev => ({ ...prev, contactPerson: e.target.value }))} className="w-64" />
-                  <button disabled={savingKey === 'contactPerson'} onClick={() => saveField('contactPerson')} className="p-1 rounded hover:bg-green-100"><Check className="w-4 h-4" /></button>
-                  <button onClick={() => cancelEdit('contactPerson')} className="p-1 rounded hover:bg-red-100"><X className="w-4 h-4" /></button>
+                  <button onClick={() => cancelEdit('contactPerson')} className="p-1 rounded hover:bg-red-100">Cancel</button>
                 </div>
               )}
             </div>
@@ -232,8 +231,7 @@ const SupplierView: React.FC = () => {
                   ) : (
                     <div className="flex items-center gap-2">
                       <Input value={form[key] || ''} onChange={(e) => setForm(prev => ({ ...prev, [key]: e.target.value }))} className="w-48" />
-                      <button disabled={savingKey === key} onClick={() => saveField(key)} className="p-1 rounded hover:bg-green-100"><Check className="w-4 h-4" /></button>
-                      <button onClick={() => cancelEdit(key)} className="p-1 rounded hover:bg-red-100"><X className="w-4 h-4" /></button>
+                      <button onClick={() => cancelEdit(key)} className="p-1 rounded hover:bg-red-100">Cancel</button>
                     </div>
                   )}
                 </div>
@@ -249,13 +247,43 @@ const SupplierView: React.FC = () => {
                   ) : (
                     <div className="flex items-center gap-2">
                       <Input value={form[key] || ''} onChange={(e) => setForm(prev => ({ ...prev, [key]: e.target.value }))} className="w-48" />
-                      <button disabled={savingKey === key} onClick={() => saveField(key)} className="p-1 rounded hover:bg-green-100"><Check className="w-4 h-4" /></button>
-                      <button onClick={() => cancelEdit(key)} className="p-1 rounded hover:bg-red-100"><X className="w-4 h-4" /></button>
+                      <button onClick={() => cancelEdit(key)} className="p-1 rounded hover:bg-red-100">Cancel</button>
                     </div>
                   )}
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* Logo upload */}
+          <div className="pt-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-muted-foreground"><ImageIcon className="w-4 h-4" /><span className="text-sm">Logo</span></div>
+              <div className="flex items-center gap-3">
+                {(logoPreview || supplier?.logo) && (
+                  <img src={logoPreview || supplier.logo} alt="logo" className="w-16 h-16 object-cover rounded border" />
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0] || null
+                    setLogoFile(file)
+                    if (file) {
+                      const url = URL.createObjectURL(file)
+                      setLogoPreview(url)
+                    } else {
+                      setLogoPreview(null)
+                    }
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Save all */}
+          <div className="flex justify-end pt-4">
+            <Button onClick={saveAll} disabled={saving}>Save Changes</Button>
           </div>
         </CardContent>
       </Card>

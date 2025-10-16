@@ -56,23 +56,17 @@ const SupplierService = {
       },
     };
   },
-  async create(payload: {
-    name: string;
-    code?: string;
-    contact?: { email?: string; phone?: string; website?: string; contactPerson?: string };
-    address?: { street?: string; city?: string; state?: string; zipCode?: string; country?: string };
-    tags?: string[];
-    notes?: string;
-  }): Promise<{ success: boolean; message: string }> {
-    const response = await api.post("/suppliers", payload);
+  async create(payload: FormData): Promise<{ success: boolean; message: string }> {
+    const response = await api.post("/suppliers", payload, { headers: { 'Content-Type': 'multipart/form-data' } });
     return response.data;
   },
   async getById(id: string) {
     const response = await api.get(`/suppliers/${id}`)
     return response.data
   },
-  async update(id: string, payload: any) {
-    const response = await api.put(`/suppliers/${id}`, payload)
+  async update(id: string, payload: FormData | any) {
+    const isFormData = typeof FormData !== 'undefined' && payload instanceof FormData
+    const response = await api.put(`/suppliers/${id}`, payload, isFormData ? { headers: { 'Content-Type': 'multipart/form-data' } } : undefined)
     return response.data
   },
   async delete(id: string) {
