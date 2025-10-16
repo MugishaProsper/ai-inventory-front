@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useProducts } from '@/context/ProductContext'
+import { useNavigate } from 'react-router-dom'
 import { useCategories } from '@/context/CategoriesContext'
 import { useSuppliers } from '@/context/SupplierContext'
 import { Card, CardContent } from '@/components/ui/card'
@@ -24,7 +25,8 @@ import { formatCurrency, formatNumber } from '@/lib/utils'
 import { Link } from 'react-router-dom'
 
 const Products: React.FC = () => {
-  const { products, loading } = useProducts()
+  const { products, loading, deleteProduct } = useProducts()
+  const navigate = useNavigate()
   const { categories } = useCategories()
   const { suppliers } = useSuppliers()
   const [viewMode, setViewMode] = useState<'GRID' | 'LIST'>('GRID')
@@ -201,7 +203,7 @@ const Products: React.FC = () => {
 
                       {/* Action Buttons */}
                       <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center space-x-2">
-                        <Button size="sm" variant="secondary">
+                        <Button size="sm" variant="secondary" onClick={() => navigate(`/products/${product.id}`)}>
                           <Eye className="h-4 w-4" />
                         </Button>
                         <Link to={`/products/${product.id}/edit`}>
@@ -209,7 +211,7 @@ const Products: React.FC = () => {
                             <Edit className="h-4 w-4" />
                           </Button>
                         </Link>
-                        <Button size="sm" variant="destructive">
+                        <Button size="sm" variant="destructive" onClick={() => deleteProduct(product.id)}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>

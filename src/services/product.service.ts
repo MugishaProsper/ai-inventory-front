@@ -107,6 +107,19 @@ const ProductService = {
       data: mapBackendProduct(data.data),
     };
   },
+  async getById(productId: string): Promise<ApiResponse<Product>> {
+    const response = await api.get(`/products/${productId}`);
+    const data = response.data;
+    return {
+      success: !!data.success,
+      message: data.message ?? "",
+      data: mapBackendProduct(data.data),
+    };
+  },
+  async delete(productId: string): Promise<{ success: boolean; message: string }> {
+    const response = await api.delete(`/products/${productId}`);
+    return response.data;
+  },
 };
 
 export default ProductService;

@@ -12,6 +12,8 @@ import Settings from "@/pages/Settings";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import { useAuth } from "@/context/AuthContext";
+import ProductForm from "@/pages/ProductForm";
+import ProductView from "@/pages/ProductView";
 
 function ProtectedRoute({ children }: { children: JSX.Element }) {
   const { user, loading } = useAuth();
@@ -45,6 +47,36 @@ function App() {
               <ProtectedRoute>
                 <Layout>
                   <Products />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/products/new"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <ProductForm />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/products/:productId/edit"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <ProductForm />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/products/:productId"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <ProductView />
                 </Layout>
               </ProtectedRoute>
             }

@@ -36,6 +36,7 @@ interface ProductContextType extends ProductState {
   refresh: (params?: { page?: number; limit?: number; search?: string }) => Promise<void>
   createProduct: (payload: Partial<Product>, files?: File[]) => Promise<void>
   updateProduct: (productId: string, payload: Partial<Product>, files?: File[]) => Promise<void>
+  deleteProduct: (productId: string) => Promise<void>
 }
 
 const ProductContext = createContext<ProductContextType | undefined>(undefined)
@@ -65,12 +66,17 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
     await load()
   }
 
+  const deleteProduct = async (productId: string) => {
+    await ProductService.delete(productId)
+    await load()
+  }
+
   useEffect(() => {
     load()
   }, [])
 
   return (
-    <ProductContext.Provider value={{ ...state, refresh: load, createProduct, updateProduct }}>
+    <ProductContext.Provider value={{ ...state, refresh: load, createProduct, updateProduct, deleteProduct }}>
       {children}
     </ProductContext.Provider>
   )

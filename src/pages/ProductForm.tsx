@@ -18,6 +18,7 @@ const ProductForm: React.FC = () => {
     name: '', sku: '', category: '', supplier: '', description: '', price: '', cost: '', quantity: '', minStock: '', maxStock: '', location: '',
   })
   const [files, setFiles] = useState<File[]>([])
+  const [previews, setPreviews] = useState<string[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -37,6 +38,12 @@ const ProductForm: React.FC = () => {
       })
     }
   }, [isEdit, editing, categories, suppliers])
+
+  useEffect(() => {
+    const urls = files.map(f => URL.createObjectURL(f))
+    setPreviews(urls)
+    return () => { urls.forEach(u => URL.revokeObjectURL(u)) }
+  }, [files])
 
   const handleChange = (field: string, value: string) => {
     setForm(prev => ({ ...prev, [field]: value }))
@@ -130,8 +137,26 @@ const ProductForm: React.FC = () => {
         <div className="md:col-span-2">
           <label className="mb-1 block">Images (max 10)</label>
           <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={onFilesSelected} />
+          {previews.length > 0 && (
+            <div className="mt-3 grid grid-cols-3 gap-3">
+              {previews.map((src, idx) => (
+                <div key={src} className="relative group">
+                  <img src={src} alt={`preview-${idx}`} className="w-full h-24 object-cover rounded" />
+                  <button
+                    type="button"
+                    onClick={() => setFiles(prev => prev.filter((_, i) => i !== idx))}
+                    className="absolute top-1 right-1 bg-black/60 text-white text-xs rounded px-1 opacity-0 group-hover:opacity-100"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
           {files.length > 0 && (
-            <div className="mt-2 text-sm text-muted-foreground">{files.length} file(s) selected</div>
+            <div className="mt-2 flex justify-end">
+              <button type="button" className="text-sm text-muted-foreground underline" onClick={() => setFiles([])}>Clear all</button>
+            </div>
           )}
         </div>
       </div>
