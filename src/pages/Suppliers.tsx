@@ -6,9 +6,11 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Plus, Truck, Star, Package, Phone, Mail, MapPin, Edit, Trash2 } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 const Suppliers: React.FC = () => {
   const { suppliers, loading, createSupplier, updateSupplier, deleteSupplier } = useSuppliers()
+  const navigate = useNavigate()
   const [open, setOpen] = useState(false)
   const [editOpen, setEditOpen] = useState(false)
   const [viewOpen, setViewOpen] = useState(false)
@@ -108,10 +110,14 @@ const Suppliers: React.FC = () => {
                   </div>
 
                   <div className="flex items-center space-x-1">
-                    <Button size="sm" variant="ghost" className="opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => { setSelectedId(supplier.id); setViewOpen(true); }}>
+                    <Button size="sm" variant="ghost" className="opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => navigate(`/suppliers/${supplier.id}`)}>
                       <Edit className="h-4 w-4" />
                     </Button>
-                    <Button size="sm" variant="ghost" className="opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => deleteSupplier(supplier.id)}>
+                    <Button size="sm" variant="ghost" className="opacity-0 group-hover:opacity-100 transition-opacity" onClick={async () => {
+                      if (window.confirm('Are you sure you want to delete this supplier?')) {
+                        await deleteSupplier(supplier.id)
+                      }
+                    }}>
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
@@ -275,73 +281,7 @@ const Suppliers: React.FC = () => {
         </div>
       )}
 
-      {/* View/Edit Supplier (simple edit modal reusing form) */}
-      {viewOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/50" onClick={() => { setViewOpen(false); setSelectedId(null); }} />
-          <div className="relative w-full max-w-2xl mx-auto bg-background text-foreground rounded-lg shadow-lg p-6">
-            <div className="mb-4">
-              <h3 className="text-lg font-semibold">Edit Supplier</h3>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="mb-1 block">Name</label>
-                <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-              </div>
-              <div>
-                <label className="mb-1 block">Email</label>
-                <Input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-              </div>
-              <div>
-                <label className="mb-1 block">Phone</label>
-                <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
-              </div>
-              <div>
-                <label className="mb-1 block">Website</label>
-                <Input value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} />
-              </div>
-              <div>
-                <label className="mb-1 block">Contact Person</label>
-                <Input value={form.contactPerson} onChange={(e) => setForm({ ...form, contactPerson: e.target.value })} />
-              </div>
-              <div className="md:col-span-2"><hr className="my-2 border-border" /></div>
-              <div>
-                <label className="mb-1 block">Street</label>
-                <Input value={form.street} onChange={(e) => setForm({ ...form, street: e.target.value })} />
-              </div>
-              <div>
-                <label className="mb-1 block">City</label>
-                <Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} />
-              </div>
-              <div>
-                <label className="mb-1 block">State</label>
-                <Input value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} />
-              </div>
-              <div>
-                <label className="mb-1 block">Zip Code</label>
-                <Input value={form.zipCode} onChange={(e) => setForm({ ...form, zipCode: e.target.value })} />
-              </div>
-              <div>
-                <label className="mb-1 block">Country</label>
-                <Input value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} />
-              </div>
-            </div>
-            <div className="flex justify-end gap-2 pt-4">
-              <Button variant="outline" onClick={() => { setViewOpen(false); setSelectedId(null); }}>Cancel</Button>
-              <Button onClick={async () => {
-                if (!selectedId) return
-                await updateSupplier(selectedId, {
-                  name: form.name,
-                  contact: { email: form.email, phone: form.phone, website: form.website, contactPerson: form.contactPerson },
-                  address: { street: form.street, city: form.city, state: form.state, zipCode: form.zipCode, country: form.country }
-                })
-                setViewOpen(false)
-                setSelectedId(null)
-              }}>Save</Button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Removed inline edit modal; edits happen on SupplierView */}
     </div>
   )
 }
