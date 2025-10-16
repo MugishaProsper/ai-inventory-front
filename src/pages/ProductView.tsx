@@ -3,9 +3,11 @@ import { useParams } from 'react-router-dom'
 import ProductService from '@/services/product.service'
 import api from '@/lib/api'
 import { Product } from '@/types'
-import { ChevronLeft, ChevronRight, DollarSign, MapPin, Package2, Star, Tags, Truck } from 'lucide-react'
+import { ArrowLeft, ChevronLeft, ChevronRight, DollarSign, MapPin, Package2, Star, Truck } from 'lucide-react'
+import { useProducts } from '@/context/ProductContext'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { useNavigate } from 'react-router-dom'
+import { format } from 'date-fns'
 
 const ProductView: React.FC = () => {
   const { productId } = useParams()
@@ -14,9 +16,23 @@ const ProductView: React.FC = () => {
   const [images, setImages] = useState<string[]>([])
   const [current, setCurrent] = useState(0)
   const [raw, setRaw] = useState<any>(null)
-  const [userRating, setUserRating] = useState<number>(5)
+  const [userRating, setUserRating] = useState<number>(0)
   const [ratingSubmitting, setRatingSubmitting] = useState<boolean>(false)
+  const navigate = useNavigate()
+  const { refresh } = useProducts()
 
+  const handleRateProduct = async (rating: number) => {
+    try {
+      setRatingSubmitting(true)
+      await ProductService.rate(productId ?? '', rating)
+      await refresh()
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setRatingSubmitting(false)
+    }
+  }
+  
   useEffect(() => {
     (async () => {
       try {
@@ -37,7 +53,7 @@ const ProductView: React.FC = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+        <div className="animate-spin rounded-full h-24 w-24 border-b-2 border-primary"></div>
       </div>
     )
   }
@@ -49,9 +65,15 @@ const ProductView: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Navigation Buttons */}
+      <div className="flex items-center justify-start">
+        <Button variant="outline" onClick={() => navigate(-1)} className='gap-2'>
+          <ArrowLeft className="w-4 h-4" />
+          Go Back
+        </Button>
+      </div>
       <div>
         <h1 className="text-2xl font-semibold text-foreground">{p?.name}</h1>
-        <p className="text-muted-foreground">SKU: {p?.sku}</p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="aspect-square bg-muted rounded-lg overflow-hidden relative flex items-center justify-center">
@@ -62,21 +84,21 @@ const ProductView: React.FC = () => {
                 <>
                   <button
                     type="button"
-                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded"
+                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-4 rounded-full"
                     onClick={() => setCurrent((prev) => (prev - 1 + images.length) % images.length)}
                     aria-label="Previous image"
                   >
-                    <ChevronLeft className="h-4 w-4" />
+                    <ChevronLeft className="h-8 w-8" />
                   </button>
                   <button
                     type="button"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-4 rounded-full"
                     onClick={() => setCurrent((prev) => (prev + 1) % images.length)}
                     aria-label="Next image"
                   >
-                    <ChevronRight className="h-4 w-4" />
+                    <ChevronRight className="h-8 w-8" />
                   </button>
-                  <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/60 text-white text-xs px-2 py-1 rounded">
+                  <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/60 text-white text-s px-4 py-2 rounded-2xl">
                     {current + 1} / {images.length}
                   </div>
                 </>
@@ -159,11 +181,13 @@ const ProductView: React.FC = () => {
           </div>
           {/* AI/Stats */}
           <div className="flex items-center gap-2 text-foreground">
-            <div className="flex items-center px-2 py-1 bg-gray-100 text-gray-700 rounded">
-              <Star className="w-4 h-4 mr-1" />
-              Avg Rating
+            {/** Stars to represent rating */}
+            <div className="flex items-center gap-4 border p-2 rounded text-foreground">
+              {Array.from({ length: 5 }).map((_, index) => (
+                <Star key={index} className={`w-8 h-8 ${Number(p?.statistics?.avgRating ?? 0) > index ? 'text-yellow-400 fill-yellow-400' : 'text-gray-400'}`} />
+              ))}
+              <span className="text-sm font-semibold text-foreground">{Number(p?.statistics?.avgRating ?? 0).toFixed(1)}</span>
             </div>
-            <div className={`flex items-center font-semibold text-lg ${p?.statistics?.avgRating ?? 0 > 0 ? 'text-green-600' : 'text-red-600'}`}>{p?.statistics?.avgRating ?? "--"}</div>
           </div>
         </div>
       </div>
@@ -173,7 +197,7 @@ const ProductView: React.FC = () => {
         <div className="space-y-3">
           <h2 className="text-lg font-semibold text-foreground">Recent Movements</h2>
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-s">
               <thead>
                 <tr className="text-left text-muted-foreground border-b border-border">
                   <th className="py-2 pr-4">Date</th>
@@ -184,11 +208,11 @@ const ProductView: React.FC = () => {
               </thead>
               <tbody>
                 {p.recentMovements.map((m: any) => (
-                  <tr key={m._id} className="border-b border-border/60">
-                    <td className="py-2 pr-4">{new Date(m.createdAt).toLocaleString()}</td>
-                    <td className="py-2 pr-4">{m.type}</td>
-                    <td className="py-2 pr-4">{m.quantity}</td>
-                    <td className="py-2 pr-4">{m.reason || '-'}</td>
+                  <tr key={m._id} className="">
+                    <td className="py-2 pr-4">{new Date(m.createdAt).toLocaleDateString()}</td>
+                    <td className={`py-2 pr-4 font-semibold text-foreground ${m.type === 'in' ? 'text-green-600' : m.type === 'out' ? 'text-red-600' : 'text-yellow-600'}`}>{String(m.type).toUpperCase()}</td>
+                    <td className={`py-2 pr-4 font-semibold text-foreground ${m.type === 'in' ? 'text-green-600' : m.type === 'out' ? 'text-red-600' : 'text-yellow-600'}`}>{m.quantity}</td>
+                    <td className="py-2 pr-4 font-semibold text-foreground">{m.reason || '-'}</td>
                   </tr>
                 ))}
               </tbody>
@@ -225,22 +249,12 @@ const ProductView: React.FC = () => {
         {/* Rate product */}
         <div className="space-y-3 p-4 rounded bg-muted">
           <h3 className="font-semibold text-foreground">Rate Product</h3>
-          <div className="flex items-center gap-2">
-            <Input type="number" min={1} max={5} value={userRating} onChange={(e) => setUserRating(Math.max(1, Math.min(5, Number(e.target.value))))} className="w-24" />
-            <Button disabled={ratingSubmitting} onClick={async () => {
-              try {
-                setRatingSubmitting(true)
-                if (!productId) return
-                await ProductService.rate(productId, userRating)
-                // Refresh basic view after rating
-                const mapped = await ProductService.getById(productId)
-                setProduct(mapped.data)
-              } finally {
-                setRatingSubmitting(false)
-              }
-            }}>Submit</Button>
+          { /** 5 Stars for users to rate the product */}
+          <div className="flex items-center gap-2 text-foreground">
+            {Array.from({ length: 5 }).map((_, index) => (
+              <Star key={index} className={`w-8 h-8 ${Number(p?.statistics?.avgRating ?? 0) > index ? 'text-yellow-400 fill-yellow-400' : 'text-gray-400'}`} onClick={() => handleRateProduct(index + 1)} />
+            ))}
           </div>
-          <p className="text-xs text-muted-foreground">Enter a rating from 1 (lowest) to 5 (highest).</p>
         </div>
       </div>
     </div>
