@@ -56,6 +56,17 @@ const SupplierService = {
       },
     };
   },
+  async create(payload: {
+    name: string;
+    code?: string;
+    contact?: { email?: string; phone?: string; website?: string; contactPerson?: string };
+    address?: { street?: string; city?: string; state?: string; zipCode?: string; country?: string };
+    tags?: string[];
+    notes?: string;
+  }): Promise<{ success: boolean; message: string }> {
+    const response = await api.post("/suppliers", payload);
+    return response.data;
+  },
 };
 
 export default SupplierService;

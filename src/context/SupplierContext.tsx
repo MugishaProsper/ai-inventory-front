@@ -33,6 +33,14 @@ function supplierReducer(state: SupplierState, action: SupplierAction): Supplier
 
 interface SupplierContextType extends SupplierState {
   refresh: () => Promise<void>
+  createSupplier: (payload: {
+    name: string;
+    code?: string;
+    contact?: { email?: string; phone?: string; website?: string; contactPerson?: string };
+    address?: { street?: string; city?: string; state?: string; zipCode?: string; country?: string };
+    tags?: string[];
+    notes?: string;
+  }) => Promise<void>
 }
 
 const SupplierContext = createContext<SupplierContextType | undefined>(undefined)
@@ -52,12 +60,17 @@ export function SupplierProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  const createSupplier: SupplierContextType['createSupplier'] = async (payload) => {
+    await SupplierService.create(payload)
+    await load()
+  }
+
   useEffect(() => {
     load()
   }, [])
 
   return (
-    <SupplierContext.Provider value={{ ...state, refresh: load }}>
+    <SupplierContext.Provider value={{ ...state, refresh: load, createSupplier }}>
       {children}
     </SupplierContext.Provider>
   )

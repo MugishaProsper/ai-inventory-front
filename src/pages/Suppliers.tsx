@@ -1,13 +1,44 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useSuppliers } from '@/context/SupplierContext'
+import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Plus, Truck, Star, Package, Phone, Mail, MapPin, Edit, Trash2 } from 'lucide-react'
 
 const Suppliers: React.FC = () => {
-  const { suppliers, loading } = useSuppliers()
+  const { suppliers, loading, createSupplier } = useSuppliers()
+  const [open, setOpen] = useState(false)
+  const [form, setForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    website: '',
+    contactPerson: '',
+    street: '', city: '', state: '', zipCode: '', country: ''
+  })
+  const [images, setImages] = useState<File[]>([])
+  const [previews, setPreviews] = useState<string[]>([])
+
+  useEffect(() => {
+    // build preview urls
+    const urls = images.map(file => URL.createObjectURL(file))
+    setPreviews(urls)
+    return () => {
+      urls.forEach(u => URL.revokeObjectURL(u))
+    }
+  }, [images])
+  const submit = async () => {
+    await createSupplier({
+      name: form.name,
+      contact: { email: form.email, phone: form.phone, website: form.website, contactPerson: form.contactPerson },
+      address: { street: form.street, city: form.city, state: form.state, zipCode: form.zipCode, country: form.country }
+    })
+    setOpen(false)
+    setForm({ name: '', email: '', phone: '', website: '', contactPerson: '', street: '', city: '', state: '', zipCode: '', country: '' })
+    setImages([])
+  }
 
   if (loading) {
     return (
@@ -38,7 +69,7 @@ const Suppliers: React.FC = () => {
               Manage your supplier relationships and performance
             </p>
           </div>
-          <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
+          <Button onClick={() => setOpen(true)} className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
             <Plus className="mr-2 h-4 w-4" />
             Add Supplier
           </Button>
@@ -145,6 +176,101 @@ const Suppliers: React.FC = () => {
           </motion.div>
         ))}
       </div>
+      {/* Add Supplier Modal */}
+      {open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setOpen(false)} />
+          <div className="relative w-full max-w-2xl mx-auto bg-background text-foreground rounded-lg shadow-lg p-6">
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold">Add Supplier</h3>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="mb-1 block">Name</label>
+                <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+              </div>
+              <div>
+                <label className="mb-1 block">Email</label>
+                <Input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+              </div>
+              <div>
+                <label className="mb-1 block">Phone</label>
+                <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+              </div>
+              <div>
+                <label className="mb-1 block">Website</label>
+                <Input value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} />
+              </div>
+              <div>
+                <label className="mb-1 block">Contact Person</label>
+                <Input value={form.contactPerson} onChange={(e) => setForm({ ...form, contactPerson: e.target.value })} />
+              </div>
+              <div className="md:col-span-2"><hr className="my-2 border-border" /></div>
+              <div className="md:col-span-2">
+                <label className="mb-1 block">Images (max 10)</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={(e) => {
+                    const files = Array.from(e.target.files || []) as File[]
+                    const limited = [...images, ...files].slice(0, 10)
+                    setImages(limited)
+                  }}
+                />
+                {previews.length > 0 && (
+                  <div className="mt-3 grid grid-cols-3 gap-3">
+                    {previews.map((src, idx) => (
+                      <div key={src} className="relative group">
+                        <img src={src} alt={`preview-${idx}`} className="w-full h-24 object-cover rounded" />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const next = images.filter((_, i) => i !== idx)
+                            setImages(next)
+                          }}
+                          className="absolute top-1 right-1 bg-black/60 text-white text-xs rounded px-1 opacity-0 group-hover:opacity-100"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {images.length > 0 && (
+                  <div className="mt-2 flex justify-end">
+                    <button type="button" className="text-sm text-muted-foreground underline" onClick={() => setImages([])}>Clear all</button>
+                  </div>
+                )}
+              </div>
+              <div>
+                <label className="mb-1 block">Street</label>
+                <Input value={form.street} onChange={(e) => setForm({ ...form, street: e.target.value })} />
+              </div>
+              <div>
+                <label className="mb-1 block">City</label>
+                <Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} />
+              </div>
+              <div>
+                <label className="mb-1 block">State</label>
+                <Input value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} />
+              </div>
+              <div>
+                <label className="mb-1 block">Zip Code</label>
+                <Input value={form.zipCode} onChange={(e) => setForm({ ...form, zipCode: e.target.value })} />
+              </div>
+              <div>
+                <label className="mb-1 block">Country</label>
+                <Input value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 pt-4">
+              <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+              <Button onClick={submit} disabled={!form.name.trim()}>Create</Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
