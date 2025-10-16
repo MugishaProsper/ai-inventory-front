@@ -195,7 +195,6 @@ const SupplierView: React.FC = () => {
                 )}
               </div>
             </div>
-
             {/* Contact */}
             <div className="grid grid-cols-1 md:grid-cols-1 gap-4 w-full border rounded px-2 py-2">
               {/* Email */}
@@ -276,6 +275,7 @@ const SupplierView: React.FC = () => {
                     <Input
                       value={form.website}
                       className="w-full"
+                      disabled={true}
                     />
                     <button
                       onClick={() => startEdit('website')}
@@ -301,33 +301,52 @@ const SupplierView: React.FC = () => {
                 )}
               </div>
               {/* Contact Person */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-muted-foreground"><User className="w-4 h-4" /><span className="text-sm">Contact Person</span></div>
+              <div className="flex items-center justify-between rounded w-full gap-2">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <User className="w-6 h-6" />
+                </div>
                 {!editing.contactPerson ? (
-                  <div className="flex items-center gap-2">
-                    <div className="text-foreground font-medium">{form.contactPerson}</div>
-                    <button onClick={() => startEdit('contactPerson')} className="p-1 rounded hover:bg-muted"><Edit className="w-4 h-4" /></button>
-                  </div>
+                  <>
+                    <Input value={form.contactPerson || ''} className="w-full" />
+                    <button
+                      onClick={() => startEdit('contactPerson')}
+                      className="p-2 rounded hover:bg-muted"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                  </>
                 ) : (
-                  <div className="flex items-center gap-2">
-                    <Input value={form.contactPerson || ''} onChange={(e) => setForm(prev => ({ ...prev, contactPerson: e.target.value }))} className="w-64" />
-                    <button onClick={() => cancelEdit('contactPerson')} className="p-1 rounded hover:bg-red-100">Cancel</button>
-                  </div>
+                  <>
+                    <Input value={form.contactPerson || ''} onChange={(e) => setForm(prev => ({ ...prev, contactPerson: e.target.value }))} className="w-full" />
+                    <button
+                      onClick={() => cancelEdit('contactPerson')}
+                      className="p-2 rounded hover:bg-muted"
+                    >
+                      <X className='w-4 h-4' />
+                    </button>
+                  </>
                 )}
               </div>
             </div>
-
             {/* Address */}
             <div className="pt-4">
-              <div className="flex items-center gap-2 text-muted-foreground"><MapPin className="w-4 h-4" /><span className="text-sm">Address</span></div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <MapPin className="w-4 h-4" />
+                <span className="text-sm">Address</span>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
                 {(['street', 'city', 'state'] as EditableKey[]).map((key) => (
                   <div key={key} className="flex items-center justify-between">
                     <div className="text-sm text-muted-foreground capitalize">{key}</div>
                     {!editing[key] ? (
                       <div className="flex items-center gap-2">
-                        <div className="text-foreground font-medium">{form[key]}</div>
-                        <button onClick={() => startEdit(key)} className="p-1 rounded hover:bg-muted"><Edit className="w-4 h-4" /></button>
+                        <Input value={form[key]} className="w-48" />
+                        <button
+                          onClick={() => startEdit(key)}
+                          className="p-1 rounded hover:bg-muted"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
                       </div>
                     ) : (
                       <div className="flex items-center gap-2">
