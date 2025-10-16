@@ -67,6 +67,18 @@ const SupplierService = {
     const response = await api.post("/suppliers", payload);
     return response.data;
   },
+  async getById(id: string) {
+    const response = await api.get(`/suppliers/${id}`)
+    return response.data
+  },
+  async update(id: string, payload: any) {
+    const response = await api.put(`/suppliers/${id}`, payload)
+    return response.data
+  },
+  async delete(id: string) {
+    const response = await api.delete(`/suppliers/${id}`)
+    return response.data
+  },
 };
 
 export default SupplierService;

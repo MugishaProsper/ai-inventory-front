@@ -41,6 +41,8 @@ interface SupplierContextType extends SupplierState {
     tags?: string[];
     notes?: string;
   }) => Promise<void>
+  updateSupplier: (id: string, payload: any) => Promise<void>
+  deleteSupplier: (id: string) => Promise<void>
 }
 
 const SupplierContext = createContext<SupplierContextType | undefined>(undefined)
@@ -65,12 +67,22 @@ export function SupplierProvider({ children }: { children: React.ReactNode }) {
     await load()
   }
 
+  const updateSupplier = async (id: string, payload: any) => {
+    await SupplierService.update(id, payload)
+    await load()
+  }
+
+  const deleteSupplier = async (id: string) => {
+    await SupplierService.delete(id)
+    await load()
+  }
+
   useEffect(() => {
     load()
   }, [])
 
   return (
-    <SupplierContext.Provider value={{ ...state, refresh: load, createSupplier }}>
+    <SupplierContext.Provider value={{ ...state, refresh: load, createSupplier, updateSupplier, deleteSupplier }}>
       {children}
     </SupplierContext.Provider>
   )
