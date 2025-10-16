@@ -13,7 +13,7 @@ import {
   ShoppingCart,
   BarChart3,
 } from 'lucide-react'
-import { formatCurrency, formatNumber, calculatePercentageChange } from '@/lib/utils'
+import { formatCurrency, formatNumber } from '@/lib/utils'
 
 const DashboardStats: React.FC = () => {
   const { state } = useInventory()

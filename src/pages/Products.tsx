@@ -27,8 +27,6 @@ import { Link } from 'react-router-dom'
 const Products: React.FC = () => {
   const { products, loading, deleteProduct } = useProducts()
   const navigate = useNavigate()
-  const { categories } = useCategories()
-  const { suppliers } = useSuppliers()
   const [viewMode, setViewMode] = useState<'GRID' | 'LIST'>('GRID')
   const [searchTerm, setSearchTerm] = useState('')
   // legacy modal state removed; using dedicated form routes now

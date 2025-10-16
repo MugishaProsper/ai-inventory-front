@@ -79,14 +79,104 @@ const ProductView: React.FC = () => {
             <div className="w-full h-full flex items-center justify-center text-muted-foreground">No image</div>
           )}
         </div>
-        <div className="space-y-3">
-          <div className="text-foreground">Price: <span className="font-medium">{product.price}</span></div>
-          <div className="text-foreground">Quantity: <span className="font-medium">{product.quantity}</span></div>
-          <div className="text-foreground">Category: <span className="font-medium">{product.category}</span></div>
-          <div className="text-foreground">Supplier: <span className="font-medium">{product.supplier}</span></div>
-          <div className="text-foreground">Location: <span className="font-medium">{product.location}</span></div>
+        <div className="space-y-4">
+          {/* Price */}
+          <div className="flex items-center gap-2 text-foreground">
+            <span className="inline-flex items-center px-2 py-1 bg-green-100 text-green-700 rounded">
+              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path d="M12 8v8m0 0a4 4 0 01-4-4c0-2.21 1.79-4 4-4s4 1.79 4 4a4 4 0 01-4 4z" />
+              </svg>
+              Price
+            </span>
+            <span className="font-semibold text-lg">${Number(product.price).toLocaleString()}</span>
+          </div>
+          {/* Quantity with indicator */}
+          <div className="flex items-center gap-2 text-foreground">
+            <span className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 rounded">
+              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M8 12h8M12 8v8" />
+              </svg>
+              Quantity
+            </span>
+            <span className={`font-semibold text-lg
+              ${product.quantity === 0 ? 'text-red-600' : product.quantity <= product.minStock ? 'text-yellow-500' : 'text-green-600'}
+            `}>
+              {product.quantity}
+              {product.quantity === 0 && <span className="ml-2 text-xs bg-red-100 text-red-700 px-2 rounded">Out of Stock</span>}
+              {product.quantity > 0 && product.quantity <= product.minStock && (
+                <span className="ml-2 text-xs bg-yellow-100 text-yellow-800 px-2 rounded">Low Stock</span>
+              )}
+            </span>
+          </div>
+          {/* Category */}
+          <div className="flex items-center gap-2 text-foreground">
+            <span className="inline-flex items-center px-2 py-1 bg-purple-100 text-purple-700 rounded">
+              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <rect x="3" y="4" width="18" height="16" rx="2" />
+                <path d="M16 2v4M8 2v4" />
+              </svg>
+              Category
+            </span>
+            {product.category && typeof product.category === 'object' ? (
+              <span className="font-medium flex items-center gap-2">
+                {product.category && typeof product.category === 'object' && (
+                  <span
+                    className="inline-block w-3 h-3 rounded-full"
+                    style={
+                      typeof product.category === 'object' && 'color' in product.category && product.category.color && !product.category.color.startsWith('bg-')
+                        ? { background: product.category.color }
+                        : undefined
+                    }
+                  >
+                    {typeof product.category === 'object' &&
+                      'color' in product.category &&
+                      product.category.color &&
+                      product.category.color.startsWith('bg-') && (
+                        <span className={`${product.category.color} w-3 h-3 rounded-full inline-block`} />
+                      )}
+                  </span>
+                )}
+                <span>{product.category.name}</span>
+                {product.category.icon && (
+                  <span className="ml-1">
+                    <i className={`lucide lucide-${product.category.icon.toLowerCase()}`} />
+                  </span>
+                )}
+              </span>
+            ) : (
+              <span className="font-medium">{typeof product.category === "string" ? product.category : "--"}</span>
+            )}
+          </div>
+          {/* Supplier */}
+          <div className="flex items-center gap-2 text-foreground">
+            <span className="inline-flex items-center px-2 py-1 bg-sky-100 text-sky-700 rounded">
+              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path d="M3 7v8a2 2 0 002 2h3v2a1 1 0 002 0v-2h2v2a1 1 0 002 0v-2h3a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2z" />
+                <path d="M21 7l-9 6-9-6" />
+              </svg>
+              Supplier
+            </span>
+            {product.supplier && typeof product.supplier === 'object' ? (
+              <span className="font-medium">{product.supplier.name}</span>
+            ) : (
+              <span className="font-medium">{typeof product.supplier === "string" ? product.supplier : "--"}</span>
+            )}
+          </div>
+          {/* Location */}
+          <div className="flex items-center gap-2 text-foreground">
+            <span className="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-700 rounded">
+              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path d="M12 2C8 2 5 5.1 5 9.3c0 5.1 7 12.7 7 12.7s7-7.6 7-12.7C19 5.1 16 2 12 2z" />
+                <circle cx="12" cy="9" r="2.5" />
+              </svg>
+              Location
+            </span>
+            <span className="font-medium">{product.location || "--"}</span>
+          </div>
         </div>
       </div>
+    </div>
     </div >
   )
 }
