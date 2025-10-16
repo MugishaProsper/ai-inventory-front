@@ -45,7 +45,7 @@ const ProductView: React.FC = () => {
           )}
         </div>
         <div className="space-y-3">
-          <div className="text-foreground">Price: <span className="font-medium">{product.price}</span></n></div>
+          <div className="text-foreground">Price: <span className="font-medium">{product.price}</span></div>
         <div className="text-foreground">Quantity: <span className="font-medium">{product.quantity}</span></div>
         <div className="text-foreground">Category: <span className="font-medium">{product.category}</span></div>
         <div className="text-foreground">Supplier: <span className="font-medium">{product.supplier}</span></div>

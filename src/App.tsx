@@ -12,7 +12,6 @@ import Settings from "@/pages/Settings";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import { useAuth } from "@/context/AuthContext";
-import ProductForm from "@/pages/ProductForm";
 import ProductView from "@/pages/ProductView";
 
 function ProtectedRoute({ children }: { children: JSX.Element }) {
