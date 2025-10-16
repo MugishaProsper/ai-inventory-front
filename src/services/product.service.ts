@@ -120,6 +120,10 @@ const ProductService = {
     const response = await api.delete(`/products/${productId}`);
     return response.data;
   },
+  async rate(productId: string, rating: number): Promise<{ success: boolean; message: string }> {
+    const response = await api.post(`/products/${productId}/rate`, { rating });
+    return response.data;
+  },
 };
 
 export default ProductService;
