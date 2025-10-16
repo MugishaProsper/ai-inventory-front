@@ -29,6 +29,7 @@ const SupplierView: React.FC = () => {
         if (!supplierId) return
         if (!fromList) {
           const res = await SupplierService.getById(supplierId)
+          console.log(res)
           setSupplier(res.data)
         }
       } finally {
