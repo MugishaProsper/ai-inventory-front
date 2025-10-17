@@ -11,6 +11,7 @@ import AIInsights from "@/pages/AIInsights";
 import SupplierProfile from "@/pages/SupplierProfile";
 import SupplierView from "@/pages/SupplierView";
 import Settings from "@/pages/Settings";
+import Chat from "@/pages/Chat";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import { useAuth } from "@/context/AuthContext";
@@ -168,6 +169,16 @@ function App() {
               <ProtectedRoute>
                 <Layout>
                   <Settings />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/chat"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <Chat />
                 </Layout>
               </ProtectedRoute>
             }

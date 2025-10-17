@@ -11,6 +11,7 @@ export interface RegisteringUser {
 }
 
 export interface User extends RegisteringUser {
+    _id : string,
     phone_number : number,
     address : string    
 }

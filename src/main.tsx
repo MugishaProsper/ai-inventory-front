@@ -7,6 +7,7 @@ import { AnalyticsProvider } from '@/context/AnalyticsContext';
 import { AiInsightsProvider } from '@/context/AiInsightsContext';
 import { ProductProvider } from '@/context/ProductContext';
 import { SettingsProvider } from '@/context/SettingsContext';
+import { ChatProvider } from '@/context/ChatContext';
 import App from './App';
 import './index.css';
 
@@ -19,7 +20,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             <AiInsightsProvider>
               <ProductProvider>
                 <SettingsProvider>
-                  <App />
+                  <ChatProvider>
+                    <App />
+                  </ChatProvider>
                 </SettingsProvider>
               </ProductProvider>
             </AiInsightsProvider>
