@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Plus, Star, Package, Phone, Mail, MapPin, Edit, Trash2, Eye } from 'lucide-react'
+import { Plus, Star, Package, Phone, Mail, MapPin, Edit, Trash2, Eye, BarChart3, User } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
 const Suppliers: React.FC = () => {
@@ -106,11 +106,11 @@ const Suppliers: React.FC = () => {
                   </div>
 
                   <div className="flex items-center space-x-1">
-                    <Button size="sm" variant="ghost" className="opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => navigate(`/suppliers/${supplier.id}`)}>
-                      <Eye className="h-4 w-4" />
-                    </Button>
                     <Button size="sm" variant="ghost" className="opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => navigate(`/suppliers/${supplier.id}/analytics`)}>
-                      <Edit className="h-4 w-4" />
+                      <BarChart3 className="h-4 w-4" />
+                    </Button>
+                    <Button size="sm" variant="ghost" className="opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => navigate(`/suppliers/${supplier.id}`)}>
+                      <User className="h-4 w-4" />
                     </Button>
                     <Button size="sm" variant="ghost" className="opacity-0 group-hover:opacity-100 transition-opacity" onClick={async () => {
                       if (window.confirm('Are you sure you want to delete this supplier?')) {

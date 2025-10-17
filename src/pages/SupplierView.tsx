@@ -5,13 +5,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, LineChart, Line, Area, AreaChart, RadialBarChart, RadialBar
+  PieChart, Pie, Cell, RadialBarChart, RadialBar
 } from 'recharts'
 import {
   ArrowLeft, TrendingUp, Package, DollarSign, Star, Truck,
   BarChart3, PieChart as PieChartIcon, Activity, Users, Clock, Award
 } from 'lucide-react'
-import { useSuppliers } from '@/context/SupplierContext'
 import SupplierService from '@/services/supplier.service'
 
 interface SupplierAnalytics {
@@ -50,7 +49,6 @@ interface SupplierAnalytics {
 const SupplierView: React.FC = () => {
   const { supplierId } = useParams()
   const navigate = useNavigate()
-  const { suppliers } = useSuppliers()
 
   const [loading, setLoading] = useState(true)
   const [analytics, setAnalytics] = useState<SupplierAnalytics | null>(null)
@@ -481,7 +479,7 @@ const SupplierView: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {analyticsData.topProducts.map((product, index) => (
+                      {analyticsData.topProducts.map((product) => (
                         <tr key={product.id} className="border-b hover:bg-muted/50">
                           <td className="py-3 px-4">
                             <div className="font-medium text-foreground">{product.name}</div>
