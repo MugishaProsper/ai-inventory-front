@@ -8,6 +8,7 @@ import Categories from "@/pages/Categories";
 import Suppliers from "@/pages/Suppliers";
 import Analytics from "@/pages/Analytics";
 import AIInsights from "@/pages/AIInsights";
+import SupplierProfile from "@/pages/SupplierProfile";
 import SupplierView from "@/pages/SupplierView";
 import Settings from "@/pages/Settings";
 import Login from "./pages/auth/Login";
@@ -123,6 +124,16 @@ function App() {
           />
           <Route
             path="/suppliers/:supplierId"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <SupplierProfile />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/suppliers/:supplierId/analytics"
             element={
               <ProtectedRoute>
                 <Layout>

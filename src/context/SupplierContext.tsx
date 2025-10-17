@@ -33,15 +33,8 @@ function supplierReducer(state: SupplierState, action: SupplierAction): Supplier
 
 interface SupplierContextType extends SupplierState {
   refresh: () => Promise<void>
-  createSupplier: (payload: {
-    name: string;
-    code?: string;
-    contact?: { email?: string; phone?: string; website?: string; contactPerson?: string };
-    address?: { street?: string; city?: string; state?: string; zipCode?: string; country?: string };
-    tags?: string[];
-    notes?: string;
-  }) => Promise<void>
-  updateSupplier: (id: string, payload: any) => Promise<void>
+  createSupplier: (payload: FormData) => Promise<void>
+  updateSupplier: (id: string, payload: FormData | any) => Promise<void>
   deleteSupplier: (id: string) => Promise<void>
 }
 
@@ -67,7 +60,7 @@ export function SupplierProvider({ children }: { children: React.ReactNode }) {
     await load()
   }
 
-  const updateSupplier = async (id: string, payload: any) => {
+  const updateSupplier = async (id: string, payload: FormData | any) => {
     await SupplierService.update(id, payload)
     await load()
   }

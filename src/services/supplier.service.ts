@@ -10,6 +10,7 @@ export interface SupplierListItem {
   rating?: number
   productsSupplied?: number
   createdAt?: Date
+  logo?: string
 }
 
 type BackendSupplier = any;
@@ -71,6 +72,10 @@ const SupplierService = {
   },
   async delete(id: string) {
     const response = await api.delete(`/suppliers/${id}`)
+    return response.data
+  },
+  async getAnalytics(id: string, period: string = '30d') {
+    const response = await api.get(`/suppliers/${id}/analytics`, { params: { period } })
     return response.data
   },
 };

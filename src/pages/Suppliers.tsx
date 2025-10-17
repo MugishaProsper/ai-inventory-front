@@ -5,16 +5,13 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Plus, Truck, Star, Package, Phone, Mail, MapPin, Edit, Trash2 } from 'lucide-react'
+import { Plus, Star, Package, Phone, Mail, MapPin, Edit, Trash2, Eye } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
 const Suppliers: React.FC = () => {
-  const { suppliers, loading, createSupplier, updateSupplier, deleteSupplier } = useSuppliers()
+  const { suppliers, loading, createSupplier, deleteSupplier } = useSuppliers()
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
-  const [editOpen, setEditOpen] = useState(false)
-  const [viewOpen, setViewOpen] = useState(false)
-  const [selectedId, setSelectedId] = useState<string | null>(null)
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -94,7 +91,7 @@ const Suppliers: React.FC = () => {
                 <div className="flex items-start justify-between">
                   <div className="flex items-center space-x-4">
                     <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
-                      <Truck className="h-6 w-6 text-white" />
+                      <Package className="h-6 w-6 text-white" />
                     </div>
                     <div>
                       <h3 className="font-semibold text-foreground text-lg">
@@ -110,6 +107,9 @@ const Suppliers: React.FC = () => {
 
                   <div className="flex items-center space-x-1">
                     <Button size="sm" variant="ghost" className="opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => navigate(`/suppliers/${supplier.id}`)}>
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    <Button size="sm" variant="ghost" className="opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => navigate(`/suppliers/${supplier.id}/analytics`)}>
                       <Edit className="h-4 w-4" />
                     </Button>
                     <Button size="sm" variant="ghost" className="opacity-0 group-hover:opacity-100 transition-opacity" onClick={async () => {

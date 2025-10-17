@@ -1,355 +1,510 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { Edit, ArrowLeft, Mail, Phone, Globe, User, MapPin } from 'lucide-react'
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  PieChart, Pie, Cell, LineChart, Line, Area, AreaChart, RadialBarChart, RadialBar
+} from 'recharts'
+import {
+  ArrowLeft, TrendingUp, Package, DollarSign, Star, Truck,
+  BarChart3, PieChart as PieChartIcon, Activity, Users, Clock, Award
+} from 'lucide-react'
 import { useSuppliers } from '@/context/SupplierContext'
 import SupplierService from '@/services/supplier.service'
 
-type EditableKey = 'name' | 'email' | 'phone' | 'website' | 'contactPerson' | 'street' | 'city' | 'state' | 'zipCode' | 'country'
+interface SupplierAnalytics {
+  supplier: {
+    id: string
+    name: string
+    code: string
+    status: string
+  }
+  analytics: {
+    totalProducts: number
+    totalValue: number
+    averagePrice: number
+    stockStatus: {
+      inStock: number
+      lowStock: number
+      outOfStock: number
+    }
+    performance: {
+      rating: number
+      deliveryPerformance: number
+      overallScore: number
+      responseTime: number
+    }
+    topProducts: Array<{
+      id: string
+      name: string
+      sku: string
+      totalSold: number
+      revenue: number
+    }>
+  }
+  period: string
+}
 
 const SupplierView: React.FC = () => {
   const { supplierId } = useParams()
   const navigate = useNavigate()
-  const { suppliers, updateSupplier, refresh } = useSuppliers()
+  const { suppliers } = useSuppliers()
 
-  const fromList = useMemo(() => suppliers.find(s => s.id === supplierId), [suppliers, supplierId])
   const [loading, setLoading] = useState(true)
-  const [supplier, setSupplier] = useState<any>(fromList || null)
-  const [editing, setEditing] = useState<Partial<Record<EditableKey, boolean>>>({})
-  const [form, setForm] = useState<{ [k in EditableKey]?: string }>({})
-  const [saving, setSaving] = useState<boolean>(false)
-  const [logoFile, setLogoFile] = useState<File | null>(null)
-  const [logoPreview, setLogoPreview] = useState<string | null>(null)
+  const [analytics, setAnalytics] = useState<SupplierAnalytics | null>(null)
+  const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d' | '1y'>('30d')
+  const [activeTab, setActiveTab] = useState<'overview' | 'performance' | 'products'>('overview')
+
+  //const supplier = suppliers.find(s => s.id === supplierId)
 
   useEffect(() => {
-    (async () => {
+    const fetchAnalytics = async () => {
+      if (!supplierId) return
+
       try {
-        if (!supplierId) return
-        if (!fromList) {
-          const res = await SupplierService.getById(supplierId)
-          console.log(res)
-          setSupplier(res.data)
-        }
+        setLoading(true)
+        const period = timeRange === '7d' ? '7d' : timeRange === '90d' ? '90d' : timeRange === '1y' ? '365d' : '30d'
+        const response = await SupplierService.getAnalytics(supplierId, period)
+        setAnalytics(response.data)
+      } catch (error) {
+        console.error('Failed to fetch supplier analytics:', error)
       } finally {
         setLoading(false)
       }
-    })()
-  }, [supplierId, fromList])
-
-  useEffect(() => {
-    if (!supplier) return;
-    setForm({
-      name: supplier.name || '',
-      email: supplier.email || supplier.contact?.email || '',
-      phone: supplier.phone || supplier.contact?.phone || '',
-      website: supplier.website || supplier.contact?.website || '',
-      contactPerson: supplier.contactPerson || supplier.contact?.contactPerson || '',
-      street: supplier.address?.street || '',
-      city: supplier.address?.city || '',
-      state: supplier.address?.state || '',
-      zipCode: supplier.address?.zipCode || '',
-      country: supplier.address?.country || '',
-    })
-  }, [supplier])
-
-  const startEdit = (key: EditableKey) => setEditing(prev => ({ ...prev, [key]: true }))
-  const cancelEdit = (key: EditableKey) => {
-    setEditing(prev => ({ ...prev, [key]: false }))
-    // reset to current value
-    if (!supplier) return
-    const current: any = {
-      name: supplier.name || '',
-      email: supplier.email || supplier.contact?.email || '',
-      phone: supplier.phone || supplier.contact?.phone || '',
-      website: supplier.website || supplier.contact?.website || '',
-      contactPerson: supplier.contactPerson || supplier.contact?.contactPerson || '',
-      street: supplier.address?.street || '',
-      city: supplier.address?.city || '',
-      state: supplier.address?.state || '',
-      zipCode: supplier.address?.zipCode || '',
-      country: supplier.address?.country || '',
     }
-    setForm(prev => ({ ...prev, [key]: current[key] }))
+
+    fetchAnalytics()
+  }, [supplierId, timeRange])
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(amount)
   }
 
-  const saveAll = async () => {
-    if (!supplierId) return
-    setSaving(true)
-    try {
-      const fd = new FormData()
-      if (logoFile) fd.append('logo', logoFile)
-      if (form.name !== undefined) fd.append('name', form.name || '')
-      const contact: Record<string, string> = {}
-      if (form.email) contact.email = form.email
-      if (form.phone) contact.phone = form.phone
-      if (form.website) contact.website = form.website
-      if (form.contactPerson) contact.contactPerson = form.contactPerson
-      if (Object.keys(contact).length > 0) {
-        fd.append('contact', JSON.stringify(contact))
-      }
-      const address: Record<string, string> = {}
-      if (form.street) address.street = form.street
-      if (form.city) address.city = form.city
-      if (form.state) address.state = form.state
-      if (form.zipCode) address.zipCode = form.zipCode
-      if (form.country) address.country = form.country
-      if (Object.keys(address).length > 0) {
-        fd.append('address', JSON.stringify(address))
-      }
-
-      await updateSupplier(supplierId, fd)
-      await refresh()
-      const res = await SupplierService.getById(supplierId)
-      setSupplier(res.data)
-      setEditing({})
-      setLogoFile(null)
-      setLogoPreview(null)
-    } finally {
-      setSaving(false)
-    }
+  const formatNumber = (num: number) => {
+    return new Intl.NumberFormat('en-US').format(num)
   }
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <div className="animate-spin rounded-full h-24 w-24 border-b-2 border-primary"></div>
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
       </div>
     )
   }
 
-  if (!supplier) return null
+  if (!analytics) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-foreground mb-2">No Analytics Data</h2>
+          <p className="text-muted-foreground">Unable to load supplier analytics</p>
+        </div>
+      </div>
+    )
+  }
+
+  const { supplier: supplierInfo, analytics: analyticsData } = analytics
+
+  // Chart data preparation
+  const stockStatusData = [
+    { name: 'In Stock', value: analyticsData.stockStatus.inStock, color: '#10b981' },
+    { name: 'Low Stock', value: analyticsData.stockStatus.lowStock, color: '#f59e0b' },
+    { name: 'Out of Stock', value: analyticsData.stockStatus.outOfStock, color: '#ef4444' }
+  ]
+
+  const topProductsData = analyticsData.topProducts.map(product => ({
+    name: product.name.length > 15 ? product.name.substring(0, 15) + '...' : product.name,
+    sales: product.totalSold,
+    revenue: product.revenue
+  }))
+
+  const performanceData = [
+    { name: 'Rating', value: analyticsData.performance.rating, max: 5 },
+    { name: 'Delivery', value: analyticsData.performance.deliveryPerformance, max: 100 },
+    { name: 'Overall', value: analyticsData.performance.overallScore, max: 100 },
+    { name: 'Response', value: Math.max(0, 100 - analyticsData.performance.responseTime), max: 100 }
+  ]
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <Button variant="outline" onClick={() => navigate(-1)} className="gap-2">
-          <ArrowLeft className="w-4 h-4" />
-          Back
-        </Button>
-      </div>
-
-      {/* Overview */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-semibold text-foreground">Supplier Details</h1>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Logo + Upload */}
-            <div className="flex items-start gap-4">
-              <div className="w-24 h-24 rounded-lg overflow-hidden bg-muted flex items-center justify-center border">
-                {(logoPreview || supplier?.logo) ? (
-                  <img src={logoPreview || supplier.logo} alt="logo" className="w-full h-full object-cover" />
-                ) : (
-                  <div className="text-muted-foreground text-xs">No Logo</div>
-                )}
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm text-muted-foreground">Upload Logo</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0] || null
-                    setLogoFile(file)
-                    if (file) {
-                      const url = URL.createObjectURL(file)
-                      setLogoPreview(url)
-                    } else {
-                      setLogoPreview(null)
-                    }
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Name + Code */}
-            <div className="md:col-span-2 space-y-4">
-              <div>
-                <div className="text-sm text-muted-foreground mb-1">Name</div>
-                <div className="flex items-center gap-2">
-                  {!editing.name ? (
-                    <>
-                      <div className="text-foreground font-medium text-lg">{form.name}</div>
-                      <button onClick={() => startEdit('name')} className="p-1 rounded hover:bg-muted"><Edit className="w-4 h-4" /></button>
-                    </>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <Input value={form.name || ''} onChange={(e) => setForm(prev => ({ ...prev, name: e.target.value }))} className="w-80" />
-                      <button onClick={() => cancelEdit('name')} className="px-2 py-1 rounded bg-red-50 text-red-700 text-xs">Cancel</button>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-1">
-                  <div className="text-xs text-muted-foreground">Code</div>
-                  <div className="text-sm font-medium text-foreground break-all">{supplier?.code || '-'}</div>
-                </div>
-                <div className="space-y-1">
-                  <div className="text-xs text-muted-foreground">Status</div>
-                  <div
-                    className={`inline-flex items-center px-2 py-1 rounded text-xs font-semibold ${supplier?.status === 'active'
-                      ? 'bg-green-100 text-green-700'
-                      : supplier?.status === 'inactive'
-                        ? 'bg-gray-100 text-gray-700'
-                        : 'bg-red-100 text-red-700'
-                      }`}
-                  >
-                    {supplier?.status || '-'}
-                  </div>
-                </div>
-                <div className="space-y-1">
-                  <div className="text-xs text-muted-foreground">Rating</div>
-                  <div className="text-sm font-medium text-foreground">{supplier?.performance?.rating ?? 0}</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Contact & Address */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-foreground">Contact & Address</h2>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Contact */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Email */}
+      {/* Header */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <Button variant="outline" onClick={() => navigate(-1)} className="gap-2">
+              <ArrowLeft className="w-4 h-4" />
+              Back
+            </Button>
             <div>
-              <div className="flex items-center justify-between mb-1">
-                <div className="flex items-center gap-2 text-muted-foreground"><Mail className="w-4 h-4" /><span className="text-sm">Email</span></div>
-                {!editing.email ? (
-                  <button onClick={() => startEdit('email')} className="p-1 rounded hover:bg-muted"><Edit className="w-4 h-4" /></button>
-                ) : null}
-              </div>
-              {!editing.email ? (
-                <div className="text-foreground font-medium">{form.email || '-'}</div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <Input value={form.email || ''} onChange={(e) => setForm(prev => ({ ...prev, email: e.target.value }))} className="w-full" />
-                  <button onClick={() => cancelEdit('email')} className="px-2 py-1 rounded bg-red-50 text-red-700 text-xs">Cancel</button>
-                </div>
-              )}
-            </div>
-
-            {/* Phone */}
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <div className="flex items-center gap-2 text-muted-foreground"><Phone className="w-4 h-4" /><span className="text-sm">Phone</span></div>
-                {!editing.phone ? (
-                  <button onClick={() => startEdit('phone')} className="p-1 rounded hover:bg-muted"><Edit className="w-4 h-4" /></button>
-                ) : null}
-              </div>
-              {!editing.phone ? (
-                <div className="text-foreground font-medium">{form.phone || '-'}</div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <Input value={form.phone || ''} onChange={(e) => setForm(prev => ({ ...prev, phone: e.target.value }))} className="w-full" />
-                  <button onClick={() => cancelEdit('phone')} className="px-2 py-1 rounded bg-red-50 text-red-700 text-xs">Cancel</button>
-                </div>
-              )}
-            </div>
-
-            {/* Website */}
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <div className="flex items-center gap-2 text-muted-foreground"><Globe className="w-4 h-4" /><span className="text-sm">Website</span></div>
-                {!editing.website ? (
-                  <button onClick={() => startEdit('website')} className="p-1 rounded hover:bg-muted"><Edit className="w-4 h-4" /></button>
-                ) : null}
-              </div>
-              {!editing.website ? (
-                <div className="text-foreground font-medium break-all">{form.website || '-'}</div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <Input value={form.website || ''} onChange={(e) => setForm(prev => ({ ...prev, website: e.target.value }))} className="w-full" />
-                  <button onClick={() => cancelEdit('website')} className="px-2 py-1 rounded bg-red-50 text-red-700 text-xs">Cancel</button>
-                </div>
-              )}
-            </div>
-
-            {/* Contact Person */}
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <div className="flex items-center gap-2 text-muted-foreground"><User className="w-4 h-4" /><span className="text-sm">Contact Person</span></div>
-                {!editing.contactPerson ? (
-                  <button onClick={() => startEdit('contactPerson')} className="p-1 rounded hover:bg-muted"><Edit className="w-4 h-4" /></button>
-                ) : null}
-              </div>
-              {!editing.contactPerson ? (
-                <div className="text-foreground font-medium">{form.contactPerson || '-'}</div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <Input value={form.contactPerson || ''} onChange={(e) => setForm(prev => ({ ...prev, contactPerson: e.target.value }))} className="w-full" />
-                  <button onClick={() => cancelEdit('contactPerson')} className="px-2 py-1 rounded bg-red-50 text-red-700 text-xs">Cancel</button>
-                </div>
-              )}
+              <h1 className="text-3xl font-bold text-foreground">{supplierInfo.name}</h1>
+              <p className="text-muted-foreground">
+                Supplier Analytics & Performance Dashboard
+              </p>
             </div>
           </div>
 
-          {/* Address */}
-          <div>
-            <div className="flex items-center gap-2 text-muted-foreground mb-2"><MapPin className="w-4 h-4" /><span className="text-sm">Address</span></div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {(['street', 'city', 'state'] as EditableKey[]).map((key) => (
-                <div key={key} className="space-y-1">
-                  <div className="flex items-center justify-between">
-                    <div className="text-xs text-muted-foreground capitalize">{key}</div>
-                    {!editing[key] ? (
-                      <button onClick={() => startEdit(key)} className="p-1 rounded hover:bg-muted"><Edit className="w-4 h-4" /></button>
-                    ) : null}
-                  </div>
-                  {!editing[key] ? (
-                    <div className="text-foreground font-medium">{form[key] || '-'}</div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <Input value={form[key] || ''} onChange={(e) => setForm(prev => ({ ...prev, [key]: e.target.value }))} className="w-full" />
-                      <button onClick={() => cancelEdit(key)} className="px-2 py-1 rounded bg-red-50 text-red-700 text-xs">Cancel</button>
-                    </div>
-                  )}
-                </div>
-              ))}
-              {(['zipCode', 'country'] as EditableKey[]).map((key) => (
-                <div key={key} className="space-y-1">
-                  <div className="flex items-center justify-between">
-                    <div className="text-xs text-muted-foreground capitalize">{key}</div>
-                    {!editing[key] ? (
-                      <button onClick={() => startEdit(key)} className="p-1 rounded hover:bg-muted"><Edit className="w-4 h-4" /></button>
-                    ) : null}
-                  </div>
-                  {!editing[key] ? (
-                    <div className="text-foreground font-medium">{form[key] || '-'}</div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <Input value={form[key] || ''} onChange={(e) => setForm(prev => ({ ...prev, [key]: e.target.value }))} className="w-full" />
-                      <button onClick={() => cancelEdit(key)} className="px-2 py-1 rounded bg-red-50 text-red-700 text-xs">Cancel</button>
-                    </div>
-                  )}
-                </div>
+          <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-1 bg-muted rounded-lg p-1">
+              {(['7d', '30d', '90d', '1y'] as const).map((period) => (
+                <Button
+                  key={period}
+                  variant={timeRange === period ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setTimeRange(period)}
+                  className="text-xs"
+                >
+                  {period}
+                </Button>
               ))}
             </div>
+            <Button variant="outline" size="sm" className="gap-2">
+              <TrendingUp className="w-4 h-4" />
+              Export
+            </Button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </motion.div>
 
-      {/* Floating Save Button */}
-      <div className="fixed bottom-6 right-6 z-40">
-        <Button onClick={saveAll} disabled={saving} className="shadow-lg">Save Changes</Button>
+      {/* Tabs */}
+      <div className="flex space-x-1 bg-muted rounded-lg p-1">
+        {[
+          { id: 'overview', label: 'Overview', icon: BarChart3 },
+          { id: 'performance', label: 'Performance', icon: Activity },
+          { id: 'products', label: 'Products', icon: Package }
+        ].map(({ id, label, icon: Icon }) => (
+          <Button
+            key={id}
+            variant={activeTab === id ? 'default' : 'ghost'}
+            onClick={() => setActiveTab(id as any)}
+            className="flex-1 gap-2"
+          >
+            <Icon className="w-4 h-4" />
+            {label}
+          </Button>
+        ))}
       </div>
+
+      {/* Overview Tab */}
+      {activeTab === 'overview' && (
+        <div className="space-y-6">
+          {/* Key Metrics */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.1 }}
+            >
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Total Products</p>
+                      <p className="text-2xl font-bold text-foreground">{formatNumber(analyticsData.totalProducts)}</p>
+                    </div>
+                    <div className="p-3 bg-blue-100 rounded-lg">
+                      <Package className="h-6 w-6 text-blue-600" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.2 }}
+            >
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Total Value</p>
+                      <p className="text-2xl font-bold text-foreground">{formatCurrency(analyticsData.totalValue)}</p>
+                    </div>
+                    <div className="p-3 bg-green-100 rounded-lg">
+                      <DollarSign className="h-6 w-6 text-green-600" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.3 }}
+            >
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Average Rating</p>
+                      <p className="text-2xl font-bold text-foreground">{analyticsData.performance.rating.toFixed(1)}</p>
+                    </div>
+                    <div className="p-3 bg-yellow-100 rounded-lg">
+                      <Star className="h-6 w-6 text-yellow-600" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.4 }}
+            >
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Delivery Performance</p>
+                      <p className="text-2xl font-bold text-foreground">{analyticsData.performance.deliveryPerformance.toFixed(1)}%</p>
+                    </div>
+                    <div className="p-3 bg-purple-100 rounded-lg">
+                      <Truck className="h-6 w-6 text-purple-600" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
+
+          {/* Charts Row */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Stock Status Pie Chart */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.5 }}
+            >
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <PieChartIcon className="w-5 h-5" />
+                    Stock Status Distribution
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <PieChart>
+                      <Pie
+                        data={stockStatusData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={100}
+                        paddingAngle={5}
+                        dataKey="value"
+                      >
+                        {stockStatusData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div className="flex justify-center space-x-6 mt-4">
+                    {stockStatusData.map((item, index) => (
+                      <div key={index} className="flex items-center space-x-2">
+                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
+                        <span className="text-sm text-muted-foreground">{item.name}: {item.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Top Products Bar Chart */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.6 }}
+            >
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BarChart3 className="w-5 h-5" />
+                    Top Selling Products
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={topProductsData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip />
+                      <Bar dataKey="sales" fill="#3b82f6" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
+        </div>
+      )}
+
+      {/* Performance Tab */}
+      {activeTab === 'performance' && (
+        <div className="space-y-6">
+          {/* Performance Metrics */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              { label: 'Overall Score', value: analyticsData.performance.overallScore, max: 100, icon: Award, color: 'blue' },
+              { label: 'Delivery Performance', value: analyticsData.performance.deliveryPerformance, max: 100, icon: Truck, color: 'green' },
+              { label: 'Response Time', value: Math.max(0, 100 - analyticsData.performance.responseTime), max: 100, icon: Clock, color: 'purple' },
+              { label: 'Quality Rating', value: analyticsData.performance.rating * 20, max: 100, icon: Star, color: 'yellow' }
+            ].map((metric, index) => (
+              <motion.div
+                key={metric.label}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.1 }}
+              >
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">{metric.label}</p>
+                        <p className="text-2xl font-bold text-foreground">{metric.value.toFixed(1)}%</p>
+                      </div>
+                      <div className={`p-3 bg-${metric.color}-100 rounded-lg`}>
+                        <metric.icon className={`h-6 w-6 text-${metric.color}-600`} />
+                      </div>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div
+                        className={`bg-${metric.color}-600 h-2 rounded-full transition-all duration-500`}
+                        style={{ width: `${(metric.value / metric.max) * 100}%` }}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Performance Radar Chart */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.4 }}
+          >
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Activity className="w-5 h-5" />
+                  Performance Overview
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={400}>
+                  <RadialBarChart cx="50%" cy="50%" innerRadius="20%" outerRadius="80%" data={performanceData}>
+                    <RadialBar dataKey="value" cornerRadius={10} fill="#3b82f6" />
+                    <Tooltip />
+                  </RadialBarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Products Tab */}
+      {activeTab === 'products' && (
+        <div className="space-y-6">
+          {/* Product Summary */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Package className="w-5 h-5" />
+                  Product Portfolio Summary
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold text-foreground">{formatNumber(analyticsData.totalProducts)}</p>
+                    <p className="text-sm text-muted-foreground">Total Products</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold text-foreground">{formatCurrency(analyticsData.averagePrice)}</p>
+                    <p className="text-sm text-muted-foreground">Average Price</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold text-foreground">{formatCurrency(analyticsData.totalValue)}</p>
+                    <p className="text-sm text-muted-foreground">Total Portfolio Value</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Top Products Table */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.2 }}
+          >
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="w-5 h-5" />
+                  Top Performing Products
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left py-3 px-4 font-medium text-muted-foreground">Product</th>
+                        <th className="text-left py-3 px-4 font-medium text-muted-foreground">SKU</th>
+                        <th className="text-right py-3 px-4 font-medium text-muted-foreground">Units Sold</th>
+                        <th className="text-right py-3 px-4 font-medium text-muted-foreground">Revenue</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {analyticsData.topProducts.map((product, index) => (
+                        <tr key={product.id} className="border-b hover:bg-muted/50">
+                          <td className="py-3 px-4">
+                            <div className="font-medium text-foreground">{product.name}</div>
+                          </td>
+                          <td className="py-3 px-4 text-muted-foreground">{product.sku}</td>
+                          <td className="py-3 px-4 text-right font-medium text-foreground">
+                            {formatNumber(product.totalSold)}
+                          </td>
+                          <td className="py-3 px-4 text-right font-medium text-foreground">
+                            {formatCurrency(product.revenue)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
+      )}
     </div>
   )
 }
 
 export default SupplierView
-
-
