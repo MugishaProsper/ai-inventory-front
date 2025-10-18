@@ -258,13 +258,11 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
   const loadDashboardData = useCallback(async (period: string = '30d') => {
     try {
       dispatch({ type: 'SET_LOADING', payload: true })
-      console.log('Loading dashboard data for period:', period)
 
       // Try the new optimized endpoint first
       try {
         const response = await DashboardService.getDashboardData(period)
         if (response.success) {
-          console.log('Dashboard data loaded successfully:', response.data)
           // Set all dashboard data at once
           dispatch({ type: 'SET_DASHBOARD_ANALYTICS', payload: response.data })
           // AI insights are included in the dashboard data
@@ -280,7 +278,6 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
       // Fallback to existing analytics service
       const response = await AnalyticsService.dashboard(period)
       if (response.success) {
-        console.log('Analytics service data loaded:', response.data)
         // Transform the data to match our expected format
         const transformedData = {
           summary: response.data.summary,
@@ -309,7 +306,6 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
   // Legacy method for backward compatibility
   const loadAIInsights = useCallback(async () => {
     // AI insights are now loaded with dashboard data
-    console.log('AI insights are loaded with dashboard data')
   }, [])
 
   const contextValue: InventoryContextType = {

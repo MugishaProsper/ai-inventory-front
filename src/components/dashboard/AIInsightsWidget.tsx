@@ -58,11 +58,11 @@ const AIInsightsWidget: React.FC = () => {
           </Badge>
         </div>
       </CardHeader>
-      
+
       <CardContent className="space-y-4">
         {aiInsights.slice(0, 3).map((insight, index) => {
           const Icon = getInsightIcon(insight.type)
-          
+
           return (
             <motion.div
               key={insight.id}
@@ -75,7 +75,7 @@ const AIInsightsWidget: React.FC = () => {
                 <div className={`p-2 rounded-lg bg-accent`}>
                   <Icon className={`h-4 w-4 ${getInsightColor(insight.type)}`} />
                 </div>
-                
+
                 <div className="flex-1 space-y-2">
                   <div className="flex items-center justify-between">
                     <h4 className="font-medium text-foreground group-hover:text-primary transition-colors">
@@ -88,14 +88,14 @@ const AIInsightsWidget: React.FC = () => {
                       </span>
                     </div>
                   </div>
-                  
+
                   <p className="text-sm text-muted-foreground line-clamp-2">
                     {insight.description}
                   </p>
-                  
+
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-muted-foreground">
-                      {formatDate(insight.createdAt)}
+                      {insight.createdAt ? formatDate(insight.createdAt) : 'Unknown date'}
                     </span>
                     {insight.actionable && (
                       <Badge variant="outline" className="text-xs">
@@ -108,7 +108,7 @@ const AIInsightsWidget: React.FC = () => {
             </motion.div>
           )
         })}
-        
+
         <Button variant="outline" className="w-full mt-4 group">
           View All Insights
           <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />

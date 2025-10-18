@@ -96,7 +96,7 @@ const RecentActivity: React.FC = () => {
 
                   <div className="flex items-center justify-between text-sm text-muted-foreground">
                     <span>Qty: {activity.quantity}</span>
-                    <span>{formatDate(activity.createdAt)}</span>
+                    <span>{activity.createdAt ? formatDate(activity.createdAt) : 'Unknown date'}</span>
                   </div>
 
                   <p className="text-xs text-muted-foreground truncate">
