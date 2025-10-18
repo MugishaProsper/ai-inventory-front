@@ -265,9 +265,9 @@ const Chat: React.FC = () => {
                       {isOwnMessage(message) && (
                         <div className="flex items-center ml-2">
                           {message.read ? (
-                            <CheckCheck className="h-3 w-3" />
+                            <CheckCheck className="h-4 w-4" />
                           ) : (
-                            <Check className="h-3 w-3" />
+                            <Check className="h-4 w-4" />
                           )}
                         </div>
                       )}
