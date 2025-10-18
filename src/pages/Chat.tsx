@@ -5,8 +5,8 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import {
   MessageCircle, Search, Send, Paperclip, MoreVertical,
-  Phone, Video, Plus,
-  ArrowLeft, User, Check, CheckCheck
+  Phone, Video, Plus, Edit, Trash2, UserPlus,
+  ArrowLeft, User, Check, CheckCheck, X, Save
 } from 'lucide-react'
 import { useChat } from '@/context/ChatContext'
 import { useAuth } from '@/context/AuthContext'
@@ -23,13 +23,25 @@ const Chat: React.FC = () => {
     searchResults,
     selectConversation,
     sendMessage,
-    searchMessages
+    searchMessages,
+    updateConversationName,
+    deleteConversation,
+    addUserToConversation,
+    updateMessage,
+    deleteMessage
   } = useChat()
 
   const { user } = useAuth()
   const [searchQuery, setSearchQuery] = useState('')
   const [messageText, setMessageText] = useState('')
   const [showSearchResults, setShowSearchResults] = useState(false)
+  const [showConversationDropdown, setShowConversationDropdown] = useState(false)
+  const [showRenameModal, setShowRenameModal] = useState(false)
+  const [showAddUserModal, setShowAddUserModal] = useState(false)
+  const [conversationName, setConversationName] = useState('')
+  const [editingMessage, setEditingMessage] = useState<string | null>(null)
+  const [editMessageText, setEditMessageText] = useState('')
+  const [newUserEmail, setNewUserEmail] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -37,6 +49,20 @@ const Chat: React.FC = () => {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => {
+      if (showConversationDropdown) {
+        setShowConversationDropdown(false)
+      }
+    }
+
+    if (showConversationDropdown) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [showConversationDropdown])
 
   // Handle search
   const handleSearch = async () => {
@@ -64,6 +90,77 @@ const Chat: React.FC = () => {
       // TODO: Implement file upload to cloudinary
       console.log('Files selected:', files)
     }
+  }
+
+  // Handle conversation actions
+  const handleRenameConversation = async () => {
+    if (!currentConversation || !conversationName.trim()) return
+
+    try {
+      await updateConversationName(currentConversation._id, conversationName.trim())
+      setShowRenameModal(false)
+      setConversationName('')
+    } catch (error) {
+      console.error('Failed to rename conversation:', error)
+    }
+  }
+
+  const handleDeleteConversation = async () => {
+    if (!currentConversation) return
+
+    if (window.confirm('Are you sure you want to delete this conversation? This action cannot be undone.')) {
+      try {
+        await deleteConversation(currentConversation._id)
+        setShowConversationDropdown(false)
+      } catch (error) {
+        console.error('Failed to delete conversation:', error)
+      }
+    }
+  }
+
+  const handleAddUserToConversation = async () => {
+    if (!currentConversation || !newUserEmail.trim()) return
+
+    try {
+      await addUserToConversation(currentConversation._id, newUserEmail.trim())
+      setShowAddUserModal(false)
+      setNewUserEmail('')
+    } catch (error) {
+      console.error('Failed to add user to conversation:', error)
+    }
+  }
+
+  // Handle message actions
+  const handleEditMessage = (messageId: string, currentText: string) => {
+    setEditingMessage(messageId)
+    setEditMessageText(currentText)
+  }
+
+  const handleSaveMessageEdit = async (messageId: string) => {
+    if (!editMessageText.trim()) return
+
+    try {
+      await updateMessage(messageId, editMessageText.trim())
+      setEditingMessage(null)
+      setEditMessageText('')
+    } catch (error) {
+      console.error('Failed to update message:', error)
+    }
+  }
+
+  const handleDeleteMessage = async (messageId: string) => {
+    if (window.confirm('Are you sure you want to delete this message?')) {
+      try {
+        await deleteMessage(messageId)
+      } catch (error) {
+        console.error('Failed to delete message:', error)
+      }
+    }
+  }
+
+  const handleCancelEdit = () => {
+    setEditingMessage(null)
+    setEditMessageText('')
   }
 
   // Format message time
@@ -114,7 +211,7 @@ const Chat: React.FC = () => {
         {/* Header */}
         <div className="p-4 border-b border-border">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-xl font-semibold text-foreground">Messages</h1>
+            <h1 className="text-xl font-semibold text-foreground">Inbox</h1>
             <div className="flex items-center space-x-2">
               {unreadCount > 0 && (
                 <Badge variant="destructive" className="text-xs">
@@ -237,9 +334,51 @@ const Chat: React.FC = () => {
                   <Button variant="ghost" size="sm">
                     <Video className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="sm">
-                    <MoreVertical className="h-4 w-4" />
-                  </Button>
+
+                  {/* Conversation Dropdown */}
+                  <div className="relative">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowConversationDropdown(!showConversationDropdown)}
+                    >
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+
+                    {showConversationDropdown && (
+                      <div className="absolute right-0 top-10 w-48 bg-background border border-border rounded-lg shadow-lg z-50">
+                        <div className="py-1">
+                          <button
+                            onClick={() => {
+                              setShowRenameModal(true)
+                              setShowConversationDropdown(false)
+                            }}
+                            className="flex items-center w-full px-4 py-2 text-sm text-foreground hover:bg-muted"
+                          >
+                            <Edit className="h-4 w-4 mr-3" />
+                            Rename Conversation
+                          </button>
+                          <button
+                            onClick={() => {
+                              setShowAddUserModal(true)
+                              setShowConversationDropdown(false)
+                            }}
+                            className="flex items-center w-full px-4 py-2 text-sm text-foreground hover:bg-muted"
+                          >
+                            <UserPlus className="h-4 w-4 mr-3" />
+                            Add User
+                          </button>
+                          <button
+                            onClick={handleDeleteConversation}
+                            className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                          >
+                            <Trash2 className="h-4 w-4 mr-3" />
+                            Delete Conversation
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -257,21 +396,77 @@ const Chat: React.FC = () => {
                     ? 'bg-primary text-primary-foreground'
                     : 'bg-muted text-foreground'
                     }`}>
-                    <p className="text-sm">{message.message}</p>
-                    <div className="flex items-center justify-between mt-1">
-                      <span className="text-xs opacity-70">
-                        {formatMessageTime(message.createdAt)}
-                      </span>
-                      {isOwnMessage(message) && (
-                        <div className="flex items-center ml-2">
-                          {message.read ? (
-                            <CheckCheck className="h-4 w-4" />
-                          ) : (
-                            <Check className="h-4 w-4" />
-                          )}
+                    {editingMessage === message._id ? (
+                      // Edit mode
+                      <div className="space-y-2">
+                        <Input
+                          value={editMessageText}
+                          onChange={(e) => setEditMessageText(e.target.value)}
+                          className="text-sm"
+                          autoFocus
+                        />
+                        <div className="flex items-center space-x-2">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleSaveMessageEdit(message._id)}
+                            className="h-6 px-2"
+                          >
+                            <Save className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={handleCancelEdit}
+                            className="h-6 px-2"
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
                         </div>
-                      )}
-                    </div>
+                      </div>
+                    ) : (
+                      // Display mode
+                      <div className="group">
+                        <p className="text-sm">{message.message}</p>
+                        <div className="flex items-center justify-between mt-1">
+                          <span className="text-xs opacity-70">
+                            {formatMessageTime(message.createdAt)}
+                          </span>
+                          <div className="flex items-center space-x-1">
+                            {isOwnMessage(message) && (
+                              <>
+                                <div className="flex items-center ml-2">
+                                  {message.read ? (
+                                    <CheckCheck className="h-4 w-4" />
+                                  ) : (
+                                    <Check className="h-4 w-4" />
+                                  )}
+                                </div>
+                                {/* Message controls for owned messages */}
+                                <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center space-x-1 ml-2">
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => handleEditMessage(message._id, message.message)}
+                                    className="h-6 w-6 p-0"
+                                  >
+                                    <Edit className="h-3 w-3" />
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => handleDeleteMessage(message._id)}
+                                    className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
+                                  >
+                                    <Trash2 className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </motion.div>
               ))}
@@ -356,6 +551,72 @@ const Chat: React.FC = () => {
                   <p className="text-sm">{message.message}</p>
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Rename Conversation Modal */}
+      {showRenameModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setShowRenameModal(false)} />
+          <div className="relative w-full max-w-md mx-auto bg-background rounded-lg shadow-lg p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Rename Conversation</h3>
+              <Button variant="ghost" onClick={() => setShowRenameModal(false)}>
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+
+            <div className="space-y-4">
+              <Input
+                placeholder="Enter conversation name"
+                value={conversationName}
+                onChange={(e) => setConversationName(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleRenameConversation()}
+              />
+
+              <div className="flex items-center justify-end space-x-2">
+                <Button variant="outline" onClick={() => setShowRenameModal(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleRenameConversation} disabled={!conversationName.trim()}>
+                  Rename
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add User Modal */}
+      {showAddUserModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setShowAddUserModal(false)} />
+          <div className="relative w-full max-w-md mx-auto bg-background rounded-lg shadow-lg p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Add User to Conversation</h3>
+              <Button variant="ghost" onClick={() => setShowAddUserModal(false)}>
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+
+            <div className="space-y-4">
+              <Input
+                placeholder="Enter user email"
+                value={newUserEmail}
+                onChange={(e) => setNewUserEmail(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleAddUserToConversation()}
+              />
+
+              <div className="flex items-center justify-end space-x-2">
+                <Button variant="outline" onClick={() => setShowAddUserModal(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleAddUserToConversation} disabled={!newUserEmail.trim()}>
+                  Add User
+                </Button>
+              </div>
             </div>
           </div>
         </div>

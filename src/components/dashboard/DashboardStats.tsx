@@ -17,12 +17,15 @@ import { formatCurrency, formatNumber } from '@/lib/utils'
 
 const DashboardStats: React.FC = () => {
   const { state } = useInventory()
-  const { dashboardStats } = state
+  const { dashboardStats, dashboardAnalytics } = state
 
-  const stats = [
+  // Use real data from analytics if available, fallback to dashboardStats
+  const data = dashboardAnalytics?.summary || dashboardStats
+
+  const statsConfig = [
     {
       name: 'Total Products',
-      value: formatNumber(dashboardStats.totalProducts || 0),
+      value: formatNumber(data.totalProducts || 0),
       change: '+12%',
       changeType: 'positive' as const,
       icon: Package,
@@ -31,7 +34,7 @@ const DashboardStats: React.FC = () => {
     },
     {
       name: 'Inventory Value',
-      value: formatCurrency(dashboardStats.totalValue || 0),
+      value: formatCurrency(data.totalValue || 0),
       change: '+8.2%',
       changeType: 'positive' as const,
       icon: DollarSign,
@@ -40,7 +43,7 @@ const DashboardStats: React.FC = () => {
     },
     {
       name: 'Low Stock Items',
-      value: formatNumber(dashboardStats.lowStockItems || 0),
+      value: formatNumber(data.lowStockItems || 0),
       change: '-5.4%',
       changeType: 'negative' as const,
       icon: AlertTriangle,
@@ -49,7 +52,7 @@ const DashboardStats: React.FC = () => {
     },
     {
       name: 'Out of Stock',
-      value: formatNumber(dashboardStats.outOfStockItems || 0),
+      value: formatNumber(data.outOfStockItems || 0),
       change: '-12.1%',
       changeType: 'positive' as const,
       icon: ShoppingCart,
@@ -58,7 +61,7 @@ const DashboardStats: React.FC = () => {
     },
     {
       name: 'Categories',
-      value: formatNumber(dashboardStats.totalCategories || 0),
+      value: formatNumber(data.totalCategories || 0),
       change: '+2',
       changeType: 'positive' as const,
       icon: Tags,
@@ -67,7 +70,7 @@ const DashboardStats: React.FC = () => {
     },
     {
       name: 'Suppliers',
-      value: formatNumber(dashboardStats.totalSuppliers || 0),
+      value: formatNumber(data.totalSuppliers || 0),
       change: '+3',
       changeType: 'positive' as const,
       icon: Users,
@@ -76,9 +79,13 @@ const DashboardStats: React.FC = () => {
     },
     {
       name: 'Monthly Revenue',
-      value: formatCurrency(dashboardStats.monthlyRevenue || 0),
-      change: `${dashboardStats.monthlyRevenueChange > 0 ? '+' : ''}${dashboardStats.monthlyRevenueChange?.toFixed(1) || 0}%`,
-      changeType: (dashboardStats.monthlyRevenueChange || 0) >= 0 ? 'positive' as const : 'negative' as const,
+      value: formatCurrency(data.monthlyRevenue || 0),
+      change: dashboardAnalytics?.summary?.monthlyRevenueChange ?
+        `${dashboardAnalytics.summary.monthlyRevenueChange > 0 ? '+' : ''}${dashboardAnalytics.summary.monthlyRevenueChange.toFixed(1)}%` :
+        '+15.3%',
+      changeType: dashboardAnalytics?.summary?.monthlyRevenueChange ?
+        (dashboardAnalytics.summary.monthlyRevenueChange >= 0 ? 'positive' as const : 'negative' as const) :
+        'positive' as const,
       icon: TrendingUp,
       color: 'text-emerald-600',
       bgColor: 'bg-emerald-50 dark:bg-emerald-950/20',
@@ -96,7 +103,7 @@ const DashboardStats: React.FC = () => {
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      {stats.map((stat, index) => (
+      {statsConfig.map((stat, index) => (
         <motion.div
           key={stat.name}
           initial={{ opacity: 0, y: 20 }}
@@ -129,7 +136,7 @@ const DashboardStats: React.FC = () => {
                   <stat.icon className={`h-6 w-6 ${stat.color}`} />
                 </div>
               </div>
-              
+
               {/* Animated background gradient */}
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
             </CardContent>

@@ -9,7 +9,10 @@ import { formatDate } from '@/lib/utils'
 
 const AlertsWidget: React.FC = () => {
   const { state } = useInventory()
-  const { dashboardStats } = state
+  const { dashboardAnalytics } = state
+
+  // Use real alerts data from analytics if available
+  const alerts = dashboardAnalytics?.recentAlerts || []
 
   const getAlertIcon = (severity: string) => {
     switch (severity) {
@@ -53,16 +56,16 @@ const AlertsWidget: React.FC = () => {
             <span>Alerts</span>
           </CardTitle>
           <Badge variant="destructive">
-            {dashboardStats.recentAlerts?.filter(alert => alert.severity === 'HIGH').length || 0} Critical
+            {alerts.filter(alert => alert.severity === 'high').length} Critical
           </Badge>
         </div>
       </CardHeader>
-      
+
       <CardContent>
         <div className="space-y-4">
-          {dashboardStats.recentAlerts?.map((alert, index) => {
+          {alerts.length > 0 ? alerts.map((alert, index) => {
             const Icon = getAlertIcon(alert.severity)
-            
+
             return (
               <motion.div
                 key={alert.id}
@@ -74,7 +77,7 @@ const AlertsWidget: React.FC = () => {
                 <div className={`p-2 rounded-lg bg-accent mt-0.5`}>
                   <Icon className={`h-4 w-4 ${getAlertColor(alert.severity)}`} />
                 </div>
-                
+
                 <div className="flex-1 space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
@@ -84,28 +87,26 @@ const AlertsWidget: React.FC = () => {
                       {alert.severity}
                     </Badge>
                   </div>
-                  
+
                   <p className="text-sm font-medium text-foreground">
                     {alert.message}
                   </p>
-                  
+
                   <p className="text-xs text-muted-foreground">
                     {formatDate(alert.createdAt)}
                   </p>
                 </div>
               </motion.div>
             )
-          })}
+          }) : (
+            <div className="text-center py-8">
+              <AlertTriangle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground">No active alerts</p>
+              <p className="text-sm text-muted-foreground mt-1">Your inventory is running smoothly!</p>
+            </div>
+          )}
         </div>
-        
-        {(!dashboardStats.recentAlerts || dashboardStats.recentAlerts.length === 0) && (
-          <div className="text-center py-8">
-            <AlertTriangle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <p className="text-muted-foreground">No active alerts</p>
-            <p className="text-sm text-muted-foreground mt-1">Your inventory is running smoothly!</p>
-          </div>
-        )}
-        
+
         <Button variant="outline" className="w-full mt-4 group">
           View All Alerts
           <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />

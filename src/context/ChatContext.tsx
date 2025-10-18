@@ -88,12 +88,15 @@ interface ChatContextType extends ChatState {
   selectConversation: (conversationId: string) => Promise<void>
   createConversation: (participantIds: string[]) => Promise<void>
   deleteConversation: (conversationId: string) => Promise<void>
+  updateConversationName: (conversationId: string, name: string) => Promise<Conversation>
+  addUserToConversation: (conversationId: string, userEmail: string) => Promise<Conversation>
 
   // Message actions
   sendMessage: (receiverId: string, message: string, files?: string[]) => Promise<void>
   loadMessages: (conversationId: string) => Promise<void>
   markAsRead: (messageId: string) => Promise<void>
   deleteMessage: (messageId: string) => Promise<void>
+  updateMessage: (messageId: string, message: string) => Promise<Message>
 
   // Utility actions
   loadUnreadCount: () => Promise<void>
@@ -242,6 +245,51 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     dispatch({ type: 'SET_SEARCH_RESULTS', payload: [] })
   }
 
+  // Update conversation name
+  const updateConversationName = async (conversationId: string, name: string) => {
+    try {
+      const response = await MessagingService.updateConversation(conversationId, { name })
+      // Refresh conversations to show updated name
+      loadConversations()
+      return response.data
+    } catch (error: any) {
+      console.error('Failed to update conversation name:', error)
+      throw error
+    }
+  }
+
+  // Add user to conversation
+  const addUserToConversation = async (conversationId: string, userEmail: string) => {
+    try {
+      const response = await MessagingService.updateConversation(conversationId, {
+        action: 'add',
+        userEmail
+      })
+      // Refresh conversations to show updated participants
+      loadConversations()
+      return response.data
+    } catch (error: any) {
+      console.error('Failed to add user to conversation:', error)
+      throw error
+    }
+  }
+
+  // Update message
+  const updateMessage = async (messageId: string, message: string) => {
+    try {
+      const response = await MessagingService.updateMessage(messageId, { message })
+      // Refresh current conversation messages
+      if (state.currentConversation) {
+        const messagesResponse = await MessagingService.getMessages(state.currentConversation._id)
+        dispatch({ type: 'SET_MESSAGES', payload: messagesResponse.data })
+      }
+      return response.data
+    } catch (error: any) {
+      console.error('Failed to update message:', error)
+      throw error
+    }
+  }
+
   // Auto-refresh conversations and unread count
   useEffect(() => {
     if (user) {
@@ -283,6 +331,9 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
       loadUnreadCount,
       searchMessages,
       clearSearch,
+      updateConversationName,
+      addUserToConversation,
+      updateMessage,
     }}>
       {children}
     </ChatContext.Provider>

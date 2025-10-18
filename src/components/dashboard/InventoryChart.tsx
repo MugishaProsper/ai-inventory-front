@@ -3,23 +3,32 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Area, AreaChart } from 'recharts'
 import { BarChart3, TrendingUp, Calendar } from 'lucide-react'
-
-const mockChartData = [
-  { name: 'Jan', value: 12400, stock: 850, revenue: 24800 },
-  { name: 'Feb', value: 11300, stock: 920, revenue: 22600 },
-  { name: 'Mar', value: 13800, stock: 780, revenue: 27600 },
-  { name: 'Apr', value: 15200, stock: 650, revenue: 30400 },
-  { name: 'May', value: 14600, stock: 720, revenue: 29200 },
-  { name: 'Jun', value: 16800, stock: 580, revenue: 33600 },
-]
+import { useInventory } from '@/context/InventoryContext'
 
 const InventoryChart: React.FC = () => {
+  const { state } = useInventory()
+  const { dashboardAnalytics } = state
   const [chartType, setChartType] = useState<'BAR' | 'LINE' | 'AREA'>('BAR')
+
+  // Use real data from analytics if available, fallback to mock data
+  const chartData = dashboardAnalytics?.charts?.dailyRevenue?.map(item => ({
+    name: new Date(item.date).toLocaleDateString('en-US', { month: 'short' }),
+    value: item.value,
+    stock: Math.floor(item.value / 20), // Simulate stock data
+    revenue: item.value
+  })) || [
+      { name: 'Jan', value: 12400, stock: 850, revenue: 24800 },
+      { name: 'Feb', value: 11300, stock: 920, revenue: 22600 },
+      { name: 'Mar', value: 13800, stock: 780, revenue: 27600 },
+      { name: 'Apr', value: 15200, stock: 650, revenue: 30400 },
+      { name: 'May', value: 14600, stock: 720, revenue: 29200 },
+      { name: 'Jun', value: 16800, stock: 580, revenue: 33600 },
+    ]
   const [dataType, setDataType] = useState<'VALUE' | 'STOCK' | 'REVENUE'>('VALUE')
 
   const renderChart = () => {
     const commonProps = {
-      data: mockChartData,
+      data: chartData,
       margin: { top: 5, right: 30, left: 20, bottom: 5 },
     }
 
@@ -30,17 +39,17 @@ const InventoryChart: React.FC = () => {
             <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
             <XAxis dataKey="name" />
             <YAxis />
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: 'hsl(var(--card))', 
+            <Tooltip
+              contentStyle={{
+                backgroundColor: 'hsl(var(--card))',
                 border: '1px solid hsl(var(--border))',
                 borderRadius: '8px'
-              }} 
+              }}
             />
-            <Line 
-              type="monotone" 
-              dataKey={dataType} 
-              stroke="hsl(var(--primary))" 
+            <Line
+              type="monotone"
+              dataKey={dataType}
+              stroke="hsl(var(--primary))"
               strokeWidth={3}
               dot={{ fill: 'hsl(var(--primary))', strokeWidth: 2, r: 4 }}
             />
@@ -52,17 +61,17 @@ const InventoryChart: React.FC = () => {
             <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
             <XAxis dataKey="name" />
             <YAxis />
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: 'hsl(var(--card))', 
+            <Tooltip
+              contentStyle={{
+                backgroundColor: 'hsl(var(--card))',
                 border: '1px solid hsl(var(--border))',
                 borderRadius: '8px'
-              }} 
+              }}
             />
-            <Area 
-              type="monotone" 
-              dataKey={dataType} 
-              stroke="hsl(var(--primary))" 
+            <Area
+              type="monotone"
+              dataKey={dataType}
+              stroke="hsl(var(--primary))"
               fill="hsl(var(--primary))"
               fillOpacity={0.2}
             />
@@ -74,16 +83,16 @@ const InventoryChart: React.FC = () => {
             <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
             <XAxis dataKey="name" />
             <YAxis />
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: 'hsl(var(--card))', 
+            <Tooltip
+              contentStyle={{
+                backgroundColor: 'hsl(var(--card))',
                 border: '1px solid hsl(var(--border))',
                 borderRadius: '8px'
-              }} 
+              }}
             />
-            <Bar 
-              dataKey={dataType} 
-              fill="hsl(var(--primary))" 
+            <Bar
+              dataKey={dataType}
+              fill="hsl(var(--primary))"
               radius={[4, 4, 0, 0]}
             />
           </BarChart>
@@ -110,7 +119,7 @@ const InventoryChart: React.FC = () => {
             <BarChart3 className="h-5 w-5" />
             <span>{getDataLabel()} Overview</span>
           </CardTitle>
-          
+
           <div className="flex items-center space-x-2">
             {/* Chart Type Selector */}
             <div className="flex items-center space-x-1 bg-muted rounded-lg p-1">
@@ -153,14 +162,14 @@ const InventoryChart: React.FC = () => {
           </div>
         </div>
       </CardHeader>
-      
+
       <CardContent>
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
             {renderChart()}
           </ResponsiveContainer>
         </div>
-        
+
         {/* Chart Summary */}
         <div className="grid grid-cols-3 gap-4 mt-6 pt-4 border-t border-border">
           <div className="text-center">

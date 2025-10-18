@@ -59,8 +59,10 @@ export interface CreateConversationRequest {
 }
 
 export interface UpdateConversationRequest {
-  action: 'add' | 'remove';
-  userId: string;
+  action?: 'add' | 'remove';
+  userId?: string;
+  userEmail?: string;
+  name?: string;
 }
 
 const MessagingService = {
@@ -78,6 +80,11 @@ const MessagingService = {
 
   async markAsRead(messageId: string): Promise<ApiResponse<Message>> {
     const response = await api.put(`/messages/${messageId}/read`);
+    return response.data;
+  },
+
+  async updateMessage(messageId: string, payload: { message: string }): Promise<ApiResponse<Message>> {
+    const response = await api.put(`/messages/${messageId}`, payload);
     return response.data;
   },
 

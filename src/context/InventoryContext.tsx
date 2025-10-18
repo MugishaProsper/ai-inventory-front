@@ -2,6 +2,7 @@ import React, { createContext, useContext, useReducer, useEffect } from 'react'
 import { Product, Category, Supplier, StockMovement, DashboardStats, AIInsight, FilterOptions } from '@/types'
 import { mockCategories, mockSuppliers, mockStockMovements, mockDashboardStats, mockAIInsights } from '@/data/mockData'
 import ProductService from '@/services/product.service'
+import DashboardService, { DashboardAnalytics } from '@/services/dashboard.service'
 
 interface InventoryState {
   products: Product[]
@@ -9,6 +10,7 @@ interface InventoryState {
   suppliers: Supplier[]
   stockMovements: StockMovement[]
   dashboardStats: DashboardStats
+  dashboardAnalytics: DashboardAnalytics | null
   aiInsights: AIInsight[]
   loading: boolean
   error: string | null
@@ -29,6 +31,7 @@ type InventoryAction =
   | { type: 'SET_STOCK_MOVEMENTS'; payload: StockMovement[] }
   | { type: 'ADD_STOCK_MOVEMENT'; payload: StockMovement }
   | { type: 'SET_DASHBOARD_STATS'; payload: DashboardStats }
+  | { type: 'SET_DASHBOARD_ANALYTICS'; payload: DashboardAnalytics }
   | { type: 'SET_AI_INSIGHTS'; payload: AIInsight[] }
   | { type: 'SET_FILTERS'; payload: FilterOptions }
   | { type: 'RESET_FILTERS' }
@@ -39,6 +42,7 @@ const initialState: InventoryState = {
   suppliers: [],
   stockMovements: [],
   dashboardStats: {} as DashboardStats,
+  dashboardAnalytics: null,
   aiInsights: [],
   loading: false,
   error: null,
@@ -79,6 +83,8 @@ function inventoryReducer(state: InventoryState, action: InventoryAction): Inven
       return { ...state, stockMovements: [action.payload, ...state.stockMovements] }
     case 'SET_DASHBOARD_STATS':
       return { ...state, dashboardStats: action.payload }
+    case 'SET_DASHBOARD_ANALYTICS':
+      return { ...state, dashboardAnalytics: action.payload }
     case 'SET_AI_INSIGHTS':
       return { ...state, aiInsights: action.payload }
     case 'SET_FILTERS':
@@ -99,6 +105,8 @@ interface InventoryContextType {
   addStockMovement: (movement: Omit<StockMovement, 'id' | 'createdAt'>) => void
   getFilteredProducts: () => Product[]
   refreshDashboardStats: () => void
+  loadDashboardAnalytics: (period?: string) => Promise<void>
+  loadAIInsights: () => Promise<void>
 }
 
 const InventoryContext = createContext<InventoryContextType | undefined>(undefined)
@@ -244,6 +252,35 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
     dispatch({ type: 'SET_DASHBOARD_STATS', payload: updatedStats })
   }
 
+  // Load dashboard analytics from backend
+  const loadDashboardAnalytics = async (period: string = '30d') => {
+    try {
+      dispatch({ type: 'SET_LOADING', payload: true })
+      const response = await DashboardService.getDashboardAnalytics(period)
+      if (response.success) {
+        dispatch({ type: 'SET_DASHBOARD_ANALYTICS', payload: response.data })
+      }
+    } catch (error: any) {
+      console.error('Failed to load dashboard analytics:', error)
+      dispatch({ type: 'SET_ERROR', payload: error?.message || 'Failed to load dashboard analytics' })
+    } finally {
+      dispatch({ type: 'SET_LOADING', payload: false })
+    }
+  }
+
+  // Load AI insights from backend
+  const loadAIInsights = async () => {
+    try {
+      const response = await DashboardService.getAIInsights()
+      if (response.success) {
+        dispatch({ type: 'SET_AI_INSIGHTS', payload: response.data })
+      }
+    } catch (error: any) {
+      console.error('Failed to load AI insights:', error)
+      // Don't set error for AI insights as it's not critical
+    }
+  }
+
   const contextValue: InventoryContextType = {
     state,
     dispatch,
@@ -253,6 +290,8 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
     addStockMovement,
     getFilteredProducts,
     refreshDashboardStats,
+    loadDashboardAnalytics,
+    loadAIInsights,
   }
 
   return (
