@@ -1,17 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import {
   MessageCircle, Search, Send, Paperclip, MoreVertical,
-  Users, Phone, Video, Archive, Trash2, Plus,
-  ArrowLeft, User, Clock, Check, CheckCheck
+  Phone, Video, Plus,
+  ArrowLeft, User, Check, CheckCheck
 } from 'lucide-react'
 import { useChat } from '@/context/ChatContext'
 import { useAuth } from '@/context/AuthContext'
 import { formatDistanceToNow } from 'date-fns'
+import MessagingTest from '@/components/MessagingTest'
 
 const Chat: React.FC = () => {
   const {
@@ -22,22 +22,23 @@ const Chat: React.FC = () => {
     error,
     unreadCount,
     searchResults,
-    searching,
     selectConversation,
     sendMessage,
-    searchMessages,
-    clearSearch,
-    deleteMessage,
-    deleteConversation
+    searchMessages
   } = useChat()
 
   const { user } = useAuth()
   const [searchQuery, setSearchQuery] = useState('')
   const [messageText, setMessageText] = useState('')
   const [showSearchResults, setShowSearchResults] = useState(false)
-  const [selectedUser, setSelectedUser] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Debug logging
+  useEffect(() => {
+    console.log('Chat component - conversations:', conversations)
+    console.log('Chat component - user:', user)
+  }, [conversations, user])
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -79,6 +80,10 @@ const Chat: React.FC = () => {
 
   // Get other user from conversation
   const getOtherUser = (conversation: any) => {
+    if (!conversation?.users || !Array.isArray(conversation.users)) {
+      console.warn('Invalid conversation structure:', conversation)
+      return null
+    }
     return conversation.users.find((u: any) => u._id !== user?._id)
   }
 
@@ -95,8 +100,25 @@ const Chat: React.FC = () => {
     )
   }
 
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-foreground mb-2">Error Loading Chat</h2>
+          <p className="text-muted-foreground mb-4">{error}</p>
+          <Button onClick={() => window.location.reload()}>Retry</Button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="h-full flex">
+      {/* Debug Test Component */}
+      <div className="w-80 border-r border-border bg-background p-4">
+        <MessagingTest />
+      </div>
+
       {/* Sidebar - Conversations List */}
       <div className="w-80 border-r border-border bg-background">
         {/* Header */}
@@ -130,7 +152,7 @@ const Chat: React.FC = () => {
 
         {/* Conversations List */}
         <div className="flex-1 overflow-y-auto">
-          {conversations.map((conversation) => {
+          {conversations && conversations.length > 0 ? conversations.map((conversation) => {
             const otherUser = getOtherUser(conversation)
             const isActive = currentConversation?._id === conversation._id
 
@@ -182,7 +204,12 @@ const Chat: React.FC = () => {
                 </div>
               </motion.div>
             )
-          })}
+          }) : (
+            <div className="p-4 text-center text-muted-foreground">
+              <MessageCircle className="h-8 w-8 mx-auto mb-2 opacity-50" />
+              <p>No conversations yet</p>
+            </div>
+          )}
         </div>
       </div>
 
@@ -237,8 +264,8 @@ const Chat: React.FC = () => {
                   className={`flex ${isOwnMessage(message) ? 'justify-end' : 'justify-start'}`}
                 >
                   <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${isOwnMessage(message)
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-muted text-foreground'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-foreground'
                     }`}>
                     <p className="text-sm">{message.message}</p>
                     <div className="flex items-center justify-between mt-1">
