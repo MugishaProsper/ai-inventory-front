@@ -61,7 +61,7 @@ const DashboardStats: React.FC = () => {
     },
     {
       name: 'Categories',
-      value: formatNumber(data.totalCategories || 0),
+      value: formatNumber(dashboardAnalytics?.charts?.categoryDistribution?.length || 0),
       change: '+2',
       changeType: 'positive' as const,
       icon: Tags,
@@ -70,7 +70,7 @@ const DashboardStats: React.FC = () => {
     },
     {
       name: 'Suppliers',
-      value: formatNumber(data.totalSuppliers || 0),
+      value: formatNumber(dashboardAnalytics?.summary?.totalSuppliers || 0),
       change: '+3',
       changeType: 'positive' as const,
       icon: Users,

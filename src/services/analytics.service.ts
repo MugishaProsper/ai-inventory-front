@@ -7,12 +7,15 @@ export interface DashboardAnalyticsResponse {
     totalValue: number
     lowStockItems: number
     outOfStockItems: number
+    totalCategories: number
+    totalSuppliers: number
     monthlyRevenue: number
     monthlyRevenueChange: number
   }
   charts: {
     dailyRevenue: { date: string; value: number }[]
     categoryDistribution: { id: string; name: string; color: string; count: number; value: number; percentage: number }[]
+    supplierDistribution: { id: string; name: string; color: string; count: number; value: number; percentage: number }[]
   }
   topSellingProducts: { id: string; name: string; sku: string; totalSold: number; revenue: number; image?: string | null }[]
   recentAlerts: { id: string; type: string; message: string; severity: string; createdAt: string }[]

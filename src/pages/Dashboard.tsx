@@ -10,14 +10,13 @@ import AlertsWidget from '@/components/dashboard/AlertsWidget'
 import QuickActions from '@/components/dashboard/QuickActions'
 
 const Dashboard: React.FC = () => {
-  const { state, loadDashboardAnalytics, loadAIInsights } = useInventory()
+  const { state, loadDashboardData } = useInventory()
   const { loading } = state
 
-  // Load dashboard data on component mount
+  // Load dashboard data on component mount (single optimized call)
   React.useEffect(() => {
-    loadDashboardAnalytics('30d')
-    loadAIInsights()
-  }, [loadDashboardAnalytics, loadAIInsights])
+    loadDashboardData('30d')
+  }, [loadDashboardData])
 
   if (loading) {
     return (

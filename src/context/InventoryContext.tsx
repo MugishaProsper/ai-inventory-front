@@ -105,6 +105,7 @@ interface InventoryContextType {
   addStockMovement: (movement: Omit<StockMovement, 'id' | 'createdAt'>) => void
   getFilteredProducts: () => Product[]
   refreshDashboardStats: () => void
+  loadDashboardData: (period?: string) => Promise<void>
   loadDashboardAnalytics: (period?: string) => Promise<void>
   loadAIInsights: () => Promise<void>
 }
@@ -252,33 +253,36 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
     dispatch({ type: 'SET_DASHBOARD_STATS', payload: updatedStats })
   }
 
-  // Load dashboard analytics from backend
-  const loadDashboardAnalytics = async (period: string = '30d') => {
+  // Load comprehensive dashboard data from backend (single optimized call)
+  const loadDashboardData = async (period: string = '30d') => {
     try {
       dispatch({ type: 'SET_LOADING', payload: true })
-      const response = await DashboardService.getDashboardAnalytics(period)
+      const response = await DashboardService.getDashboardData(period)
       if (response.success) {
+        // Set all dashboard data at once
         dispatch({ type: 'SET_DASHBOARD_ANALYTICS', payload: response.data })
+        // AI insights are included in the dashboard data
+        if (response.data.aiInsights && Array.isArray(response.data.aiInsights)) {
+          dispatch({ type: 'SET_AI_INSIGHTS', payload: response.data.aiInsights })
+        }
       }
     } catch (error: any) {
-      console.error('Failed to load dashboard analytics:', error)
-      dispatch({ type: 'SET_ERROR', payload: error?.message || 'Failed to load dashboard analytics' })
+      console.error('Failed to load dashboard data:', error)
+      dispatch({ type: 'SET_ERROR', payload: error?.message || 'Failed to load dashboard data' })
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false })
     }
   }
 
-  // Load AI insights from backend
+  // Legacy method for backward compatibility
+  const loadDashboardAnalytics = async (period: string = '30d') => {
+    return loadDashboardData(period)
+  }
+
+  // Legacy method for backward compatibility
   const loadAIInsights = async () => {
-    try {
-      const response = await DashboardService.getAIInsights()
-      if (response.success) {
-        dispatch({ type: 'SET_AI_INSIGHTS', payload: response.data })
-      }
-    } catch (error: any) {
-      console.error('Failed to load AI insights:', error)
-      // Don't set error for AI insights as it's not critical
-    }
+    // AI insights are now loaded with dashboard data
+    console.log('AI insights are loaded with dashboard data')
   }
 
   const contextValue: InventoryContextType = {
@@ -290,6 +294,7 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
     addStockMovement,
     getFilteredProducts,
     refreshDashboardStats,
+    loadDashboardData,
     loadDashboardAnalytics,
     loadAIInsights,
   }

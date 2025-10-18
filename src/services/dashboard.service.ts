@@ -49,6 +49,8 @@ export interface DashboardAnalytics {
   };
   topSellingProducts: TopSellingProduct[];
   recentAlerts: Alert[];
+  recentActivity: any[];
+  aiInsights: any[];
   period: string;
 }
 
@@ -73,9 +75,17 @@ export interface SupplierPerformance {
 }
 
 const DashboardService = {
-  // Get dashboard analytics
-  async getDashboardAnalytics(period: string = '30d'): Promise<ApiResponse<DashboardAnalytics>> {
+  // Get comprehensive dashboard data in single request
+  async getDashboardData(period: string = '30d'): Promise<ApiResponse<DashboardAnalytics>> {
     const response = await api.get('/analytics/dashboard', {
+      params: { period }
+    });
+    return response.data;
+  },
+
+  // Get dashboard analytics (legacy endpoint)
+  async getDashboardAnalytics(period: string = '30d'): Promise<ApiResponse<DashboardAnalytics>> {
+    const response = await api.get('/analytics/dashboard/analytics', {
       params: { period }
     });
     return response.data;
