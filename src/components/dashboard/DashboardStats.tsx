@@ -20,12 +20,12 @@ const DashboardStats: React.FC = () => {
   const { dashboardStats, dashboardAnalytics } = state
 
   // Use real data from analytics if available, fallback to dashboardStats
-  const data = dashboardAnalytics?.summary || dashboardStats
+  const data = dashboardAnalytics?.summary
 
   const statsConfig = [
     {
       name: 'Total Products',
-      value: formatNumber(data.totalProducts || 0),
+      value: formatNumber(data?.totalProducts || 0),
       change: '+12%',
       changeType: 'positive' as const,
       icon: Package,
@@ -34,7 +34,7 @@ const DashboardStats: React.FC = () => {
     },
     {
       name: 'Inventory Value',
-      value: formatCurrency(data.totalValue || 0),
+      value: formatCurrency(data?.totalValue || 0),
       change: '+8.2%',
       changeType: 'positive' as const,
       icon: DollarSign,
@@ -43,7 +43,7 @@ const DashboardStats: React.FC = () => {
     },
     {
       name: 'Low Stock Items',
-      value: formatNumber(data.lowStockItems || 0),
+      value: formatNumber(data?.lowStockItems || 0),
       change: '-5.4%',
       changeType: 'negative' as const,
       icon: AlertTriangle,
@@ -52,7 +52,7 @@ const DashboardStats: React.FC = () => {
     },
     {
       name: 'Out of Stock',
-      value: formatNumber(data.outOfStockItems || 0),
+      value: formatNumber(data?.outOfStockItems || 0),
       change: '-12.1%',
       changeType: 'positive' as const,
       icon: ShoppingCart,
@@ -61,7 +61,7 @@ const DashboardStats: React.FC = () => {
     },
     {
       name: 'Categories',
-      value: formatNumber(data.totalCategories || 0),
+      value: formatNumber(data?.totalCategories || 0),
       change: '+2',
       changeType: 'positive' as const,
       icon: Tags,
@@ -70,7 +70,7 @@ const DashboardStats: React.FC = () => {
     },
     {
       name: 'Suppliers',
-      value: formatNumber(data.totalSuppliers || 0),
+      value: formatNumber(data?.totalSuppliers || 0),
       change: '+3',
       changeType: 'positive' as const,
       icon: Users,
@@ -79,7 +79,7 @@ const DashboardStats: React.FC = () => {
     },
     {
       name: 'Monthly Revenue',
-      value: formatCurrency(data.monthlyRevenue || 0),
+      value: formatCurrency(data?.monthlyRevenue || 0),
       change: dashboardAnalytics?.summary?.monthlyRevenueChange ?
         `${dashboardAnalytics.summary.monthlyRevenueChange > 0 ? '+' : ''}${dashboardAnalytics.summary.monthlyRevenueChange.toFixed(1)}%` :
         '+15.3%',

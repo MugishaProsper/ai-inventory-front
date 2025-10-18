@@ -63,7 +63,7 @@ export function AiInsightsProvider({ children }: { children: React.ReactNode }) 
 
   useEffect(() => {
     load()
-  }, [])
+  })
 
   return (
     <AiInsightsContext.Provider value={{ ...state, refresh: load }}>
