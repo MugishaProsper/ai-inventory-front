@@ -30,7 +30,7 @@ export interface TopSellingProduct {
   sku: string;
   totalSold: number;
   revenue: number;
-  image?: string;
+  image?: string | null;
 }
 
 export interface Alert {

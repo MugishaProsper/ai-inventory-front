@@ -3,6 +3,7 @@ import { Product, Category, Supplier, StockMovement, DashboardStats, AIInsight, 
 import { mockCategories, mockSuppliers, mockStockMovements, mockDashboardStats, mockAIInsights } from '@/data/mockData'
 import ProductService from '@/services/product.service'
 import DashboardService, { DashboardAnalytics } from '@/services/dashboard.service'
+import AnalyticsService from '@/services/analytics.service'
 
 interface InventoryState {
   products: Product[]
@@ -257,14 +258,40 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
   const loadDashboardData = async (period: string = '30d') => {
     try {
       dispatch({ type: 'SET_LOADING', payload: true })
-      const response = await DashboardService.getDashboardData(period)
-      if (response.success) {
-        // Set all dashboard data at once
-        dispatch({ type: 'SET_DASHBOARD_ANALYTICS', payload: response.data })
-        // AI insights are included in the dashboard data
-        if (response.data.aiInsights && Array.isArray(response.data.aiInsights)) {
-          dispatch({ type: 'SET_AI_INSIGHTS', payload: response.data.aiInsights })
+      console.log('Loading dashboard data for period:', period)
+
+      // Try the new optimized endpoint first
+      try {
+        const response = await DashboardService.getDashboardData(period)
+        if (response.success) {
+          console.log('Dashboard data loaded successfully:', response.data)
+          // Set all dashboard data at once
+          dispatch({ type: 'SET_DASHBOARD_ANALYTICS', payload: response.data })
+          // AI insights are included in the dashboard data
+          if (response.data.aiInsights && Array.isArray(response.data.aiInsights)) {
+            dispatch({ type: 'SET_AI_INSIGHTS', payload: response.data.aiInsights })
+          }
+          return
         }
+      } catch (newEndpointError) {
+        console.warn('New endpoint failed, trying analytics service:', newEndpointError)
+      }
+
+      // Fallback to existing analytics service
+      const response = await AnalyticsService.dashboard(period)
+      if (response.success) {
+        console.log('Analytics service data loaded:', response.data)
+        // Transform the data to match our expected format
+        const transformedData = {
+          summary: response.data.summary,
+          charts: response.data.charts,
+          topSellingProducts: response.data.topSellingProducts,
+          recentAlerts: response.data.recentAlerts,
+          recentActivity: [],
+          aiInsights: [],
+          period: response.data.period
+        }
+        dispatch({ type: 'SET_DASHBOARD_ANALYTICS', payload: transformedData })
       }
     } catch (error: any) {
       console.error('Failed to load dashboard data:', error)

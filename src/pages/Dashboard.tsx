@@ -15,8 +15,18 @@ const Dashboard: React.FC = () => {
 
   // Load dashboard data on component mount (single optimized call)
   React.useEffect(() => {
+    console.log('Dashboard component mounted, loading data...')
     loadDashboardData('30d')
   }, [loadDashboardData])
+
+  // Debug logging
+  React.useEffect(() => {
+    console.log('Dashboard state changed:', {
+      loading: state.loading,
+      hasAnalytics: !!state.dashboardAnalytics,
+      error: state.error
+    })
+  }, [state.loading, state.dashboardAnalytics, state.error])
 
   if (loading) {
     return (
