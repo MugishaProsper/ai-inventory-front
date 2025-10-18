@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react'
+import React, { createContext, useContext, useReducer, useEffect, useCallback } from 'react'
 import { Product, Category, Supplier, StockMovement, DashboardStats, AIInsight, FilterOptions } from '@/types'
 import { mockCategories, mockSuppliers, mockStockMovements, mockDashboardStats, mockAIInsights } from '@/data/mockData'
 import ProductService from '@/services/product.service'
@@ -255,7 +255,7 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
   }
 
   // Load comprehensive dashboard data from backend (single optimized call)
-  const loadDashboardData = async (period: string = '30d') => {
+  const loadDashboardData = useCallback(async (period: string = '30d') => {
     try {
       dispatch({ type: 'SET_LOADING', payload: true })
       console.log('Loading dashboard data for period:', period)
@@ -291,7 +291,7 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
           aiInsights: [],
           period: response.data.period
         }
-        dispatch({ type: 'SET_DASHBOARD_ANALYTICS', payload: transformedData })
+        dispatch({ type: 'SET_DASHBOARD_ANALYTICS', payload: transformedData as DashboardAnalytics })
       }
     } catch (error: any) {
       console.error('Failed to load dashboard data:', error)
@@ -299,18 +299,18 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false })
     }
-  }
+  }, []) // Empty dependency array since this function doesn't depend on any props or state
 
   // Legacy method for backward compatibility
-  const loadDashboardAnalytics = async (period: string = '30d') => {
+  const loadDashboardAnalytics = useCallback(async (period: string = '30d') => {
     return loadDashboardData(period)
-  }
+  }, [loadDashboardData])
 
   // Legacy method for backward compatibility
-  const loadAIInsights = async () => {
+  const loadAIInsights = useCallback(async () => {
     // AI insights are now loaded with dashboard data
     console.log('AI insights are loaded with dashboard data')
-  }
+  }, [])
 
   const contextValue: InventoryContextType = {
     state,

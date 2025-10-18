@@ -17,7 +17,7 @@ const Dashboard: React.FC = () => {
   React.useEffect(() => {
     console.log('Dashboard component mounted, loading data...')
     loadDashboardData('30d')
-  }, [loadDashboardData])
+  }, []) // Remove loadDashboardData from dependencies to prevent infinite loop
 
   // Debug logging
   React.useEffect(() => {
