@@ -116,26 +116,26 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
 
   // Initialize data
   useEffect(() => {
-    let isMounted = true;
-    (async () => {
-      try {
-        dispatch({ type: 'SET_LOADING', payload: true })
-        const productsRes = await ProductService.list({ page: 1, limit: 20 })
-        if (isMounted && productsRes.success) {
-          dispatch({ type: 'SET_PRODUCTS', payload: productsRes.data })
+    let isMounted = true
+      ; (async () => {
+        try {
+          dispatch({ type: 'SET_LOADING', payload: true })
+          const productsRes = await ProductService.list({ page: 1, limit: 20 })
+          if (isMounted && productsRes.success) {
+            dispatch({ type: 'SET_PRODUCTS', payload: productsRes.data })
+          }
+          // Keep mock placeholders for other domains until services are implemented
+          dispatch({ type: 'SET_CATEGORIES', payload: mockCategories })
+          dispatch({ type: 'SET_SUPPLIERS', payload: mockSuppliers })
+          dispatch({ type: 'SET_STOCK_MOVEMENTS', payload: mockStockMovements })
+          dispatch({ type: 'SET_DASHBOARD_STATS', payload: mockDashboardStats })
+          dispatch({ type: 'SET_AI_INSIGHTS', payload: mockAIInsights })
+        } catch (e: any) {
+          dispatch({ type: 'SET_ERROR', payload: e?.message || 'Failed to load inventory' })
+        } finally {
+          if (isMounted) dispatch({ type: 'SET_LOADING', payload: false })
         }
-        // Keep mock placeholders for other domains until services are implemented
-        dispatch({ type: 'SET_CATEGORIES', payload: mockCategories })
-        dispatch({ type: 'SET_SUPPLIERS', payload: mockSuppliers })
-        dispatch({ type: 'SET_STOCK_MOVEMENTS', payload: mockStockMovements })
-        dispatch({ type: 'SET_DASHBOARD_STATS', payload: mockDashboardStats })
-        dispatch({ type: 'SET_AI_INSIGHTS', payload: mockAIInsights })
-      } catch (e: any) {
-        dispatch({ type: 'SET_ERROR', payload: e?.message || 'Failed to load inventory' })
-      } finally {
-        if (isMounted) dispatch({ type: 'SET_LOADING', payload: false })
-      }
-    })()
+      })()
     return () => {
       isMounted = false
     }

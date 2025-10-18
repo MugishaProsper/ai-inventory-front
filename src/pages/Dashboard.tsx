@@ -14,10 +14,10 @@ const Dashboard: React.FC = () => {
   const { loading } = state
 
   // Load dashboard data on component mount
-  // React.useEffect(() => {
-  //   loadDashboardAnalytics('30d')
-  //   loadAIInsights()
-  // }, [loadDashboardAnalytics, loadAIInsights])
+  React.useEffect(() => {
+    loadDashboardAnalytics('30d')
+    loadAIInsights()
+  }, [loadDashboardAnalytics, loadAIInsights])
 
   if (loading) {
     return (
