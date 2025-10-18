@@ -113,7 +113,6 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     try {
       dispatch({ type: 'SET_LOADING', payload: true })
       const response = await MessagingService.getConversations()
-      console.log('Conversations response:', response)
       dispatch({ type: 'SET_CONVERSATIONS', payload: response.data })
     } catch (error: any) {
       console.error('Failed to load conversations:', error)
@@ -246,7 +245,6 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   // Auto-refresh conversations and unread count
   useEffect(() => {
     if (user) {
-      console.log('User authenticated, loading conversations...')
       loadConversations()
       loadUnreadCount()
 
@@ -261,8 +259,6 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
       return () => {
         if (interval) clearInterval(interval)
       }
-    } else {
-      console.log('No user authenticated')
     }
   }, [user])
 

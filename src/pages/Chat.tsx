@@ -11,7 +11,6 @@ import {
 import { useChat } from '@/context/ChatContext'
 import { useAuth } from '@/context/AuthContext'
 import { formatDistanceToNow } from 'date-fns'
-import MessagingTest from '@/components/MessagingTest'
 
 const Chat: React.FC = () => {
   const {
@@ -33,12 +32,6 @@ const Chat: React.FC = () => {
   const [showSearchResults, setShowSearchResults] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
-
-  // Debug logging
-  useEffect(() => {
-    console.log('Chat component - conversations:', conversations)
-    console.log('Chat component - user:', user)
-  }, [conversations, user])
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -80,11 +73,13 @@ const Chat: React.FC = () => {
 
   // Get other user from conversation
   const getOtherUser = (conversation: any) => {
-    if (!conversation?.users || !Array.isArray(conversation.users)) {
+    // Handle both 'users' and 'participants' field names
+    const users = conversation?.users || conversation?.participants
+    if (!users || !Array.isArray(users)) {
       console.warn('Invalid conversation structure:', conversation)
       return null
     }
-    return conversation.users.find((u: any) => u._id !== user?._id)
+    return users.find((u: any) => u._id !== user?._id)
   }
 
   // Check if message is from current user
@@ -114,11 +109,6 @@ const Chat: React.FC = () => {
 
   return (
     <div className="h-full flex">
-      {/* Debug Test Component */}
-      <div className="w-80 border-r border-border bg-background p-4">
-        <MessagingTest />
-      </div>
-
       {/* Sidebar - Conversations List */}
       <div className="w-80 border-r border-border bg-background">
         {/* Header */}
