@@ -1,33 +1,70 @@
-import React, { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
-import { BarChart3, TrendingUp, Download, DollarSign, Package, Users } from 'lucide-react'
-import { formatCurrency } from '@/lib/utils'
-import { useAnalytics } from '@/context/AnalyticsContext'
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
+import {
+  BarChart3,
+  TrendingUp,
+  Download,
+  DollarSign,
+  Package,
+  Users,
+} from "lucide-react";
+import { formatCurrency } from "@/lib/utils";
+import { useAnalytics } from "@/context/AnalyticsContext";
 
 const Analytics: React.FC = () => {
-  const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d' | '1y'>('30d')
-  const { dashboard, loading, refresh } = useAnalytics()
+  const [timeRange, setTimeRange] = useState<"7D" | "30D" | "90D" | "1Y">(
+    "30D"
+  );
+  const { dashboard, loading, refresh } = useAnalytics();
 
   useEffect(() => {
-    const period = timeRange === '7d' ? '7d' : timeRange === '90d' ? '90d' : timeRange === '1y' ? '365d' : '30d'
-    refresh(period)
-  }, [timeRange])
+    const period =
+      timeRange === "7D"
+        ? "7D"
+        : timeRange === "90D"
+        ? "90D"
+        : timeRange === "1Y"
+        ? "365d"
+        : "30D";
+    refresh(period);
+  }, [timeRange]);
 
-  const summary = dashboard?.summary
-  const dailyRevenue = dashboard?.charts.dailyRevenue ?? []
-  const categoryData = dashboard?.charts.categoryDistribution?.map((c) => ({ name: c.name, value: c.percentage, color: c.color })) ?? []
-  const topProductsData = dashboard?.topSellingProducts?.map((p) => ({ name: p.name, sales: p.totalSold, revenue: p.revenue })) ?? []
+  const summary = dashboard?.summary;
+  const dailyRevenue = dashboard?.charts.dailyRevenue ?? [];
+  const categoryData =
+    dashboard?.charts.categoryDistribution?.map((c) => ({
+      name: c.name,
+      value: c.percentage,
+      color: c.color,
+    })) ?? [];
+  const topProductsData =
+    dashboard?.topSellingProducts?.map((p) => ({
+      name: p.name,
+      sales: p.totalSold,
+      revenue: p.revenue,
+    })) ?? [];
 
   if (loading || !dashboard) {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
       </div>
-    )
+    );
   }
 
   return (
@@ -48,10 +85,10 @@ const Analytics: React.FC = () => {
 
           <div className="flex items-center space-x-3">
             <div className="flex items-center space-x-1 bg-muted rounded-lg p-1">
-              {(['7d', '30d', '90d', '1y'] as const).map((range) => (
+              {(["7D", "30D", "90D", "1Y"] as const).map((range) => (
                 <Button
                   key={range}
-                  variant={timeRange === range ? 'secondary' : 'ghost'}
+                  variant={timeRange === range ? "secondary" : "ghost"}
                   size="sm"
                   onClick={() => setTimeRange(range)}
                   className="h-8 px-3"
@@ -75,15 +112,38 @@ const Analytics: React.FC = () => {
         transition={{ duration: 0.3, delay: 0.1 }}
       >
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[{
-            title: 'Total Revenue', value: formatCurrency(summary?.monthlyRevenue ?? 0), change: `${summary?.monthlyRevenueChange ?? 0}%`, icon: DollarSign, color: 'text-green-600'
-          }, {
-            title: 'Units Sold', value: String(topProductsData.reduce((s, p) => s + (p.sales || 0), 0)), change: '+', icon: Package, color: 'text-blue-600'
-          }, {
-            title: 'Low Stock Items', value: String(summary?.lowStockItems ?? 0), change: '', icon: TrendingUp, color: 'text-purple-600'
-          }, {
-            title: 'Total Products', value: String(summary?.totalProducts ?? 0), change: '', icon: Users, color: 'text-orange-600'
-          }].map((kpi, index) => (
+          {[
+            {
+              title: "Total Revenue",
+              value: formatCurrency(summary?.monthlyRevenue ?? 0),
+              change: `${summary?.monthlyRevenueChange ?? 0}%`,
+              icon: DollarSign,
+              color: "text-green-600",
+            },
+            {
+              title: "Units Sold",
+              value: String(
+                topProductsData.reduce((s, p) => s + (p.sales || 0), 0)
+              ),
+              change: "+",
+              icon: Package,
+              color: "text-blue-600",
+            },
+            {
+              title: "Low Stock Items",
+              value: String(summary?.lowStockItems ?? 0),
+              change: "",
+              icon: TrendingUp,
+              color: "text-purple-600",
+            },
+            {
+              title: "Total Products",
+              value: String(summary?.totalProducts ?? 0),
+              change: "",
+              icon: Users,
+              color: "text-orange-600",
+            },
+          ].map((kpi, index) => (
             <motion.div
               key={kpi.title}
               initial={{ opacity: 0, scale: 0.9 }}
@@ -134,17 +194,24 @@ const Analytics: React.FC = () => {
               <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={dailyRevenue}>
-                    <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      className="opacity-30"
+                    />
                     <XAxis dataKey="date" />
                     <YAxis />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: 'hsl(var(--card))',
-                        border: '1px solid hsl(var(--border))',
-                        borderRadius: '8px'
+                        backgroundColor: "hsl(var(--card))",
+                        border: "1px solid hsl(var(--border))",
+                        borderRadius: "8px",
                       }}
                     />
-                    <Bar dataKey="value" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                    <Bar
+                      dataKey="value"
+                      fill="hsl(var(--primary))"
+                      radius={[4, 4, 0, 0]}
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -185,7 +252,10 @@ const Analytics: React.FC = () => {
               </div>
               <div className="grid grid-cols-2 gap-4 mt-4">
                 {categoryData.map((category) => (
-                  <div key={category.name} className="flex items-center space-x-2">
+                  <div
+                    key={category.name}
+                    className="flex items-center space-x-2"
+                  >
                     <div
                       className="w-3 h-3 rounded-full"
                       style={{ backgroundColor: category.color }}
@@ -214,7 +284,10 @@ const Analytics: React.FC = () => {
           <CardContent>
             <div className="space-y-4">
               {topProductsData.map((product, index) => (
-                <div key={product.name} className="flex items-center justify-between p-3 rounded-lg hover:bg-accent transition-colors">
+                <div
+                  key={product.name}
+                  className="flex items-center justify-between p-3 rounded-lg hover:bg-accent transition-colors"
+                >
                   <div className="flex items-center space-x-4">
                     <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
                       <span className="text-sm font-bold text-primary">
@@ -222,7 +295,9 @@ const Analytics: React.FC = () => {
                       </span>
                     </div>
                     <div>
-                      <h4 className="font-medium text-foreground">{product.name}</h4>
+                      <h4 className="font-medium text-foreground">
+                        {product.name}
+                      </h4>
                       <p className="text-sm text-muted-foreground">
                         {product.sales} units sold
                       </p>
@@ -241,7 +316,7 @@ const Analytics: React.FC = () => {
         </Card>
       </motion.div>
     </div>
-  )
-}
+  );
+};
 
-export default Analytics
+export default Analytics;

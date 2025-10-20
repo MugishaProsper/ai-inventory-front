@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Plus, Star, Package, Phone, Mail, MapPin, Edit, Trash2, Eye, BarChart3, User } from 'lucide-react'
+import { Plus, Star, Package, Phone, Mail, MapPin, Trash2, BarChart3, User } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
 const Suppliers: React.FC = () => {

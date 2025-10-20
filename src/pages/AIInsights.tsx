@@ -9,22 +9,22 @@ import { formatDate } from '@/lib/utils'
 
 const AIInsights: React.FC = () => {
   const { insights, loading, refresh } = useAiInsights()
-  const [filter, setFilter] = useState<string>('all')
+  const [filter, setFilter] = useState<string>('ALL')
 
   useEffect(() => {
-    const params = filter === 'all' ? {} : { type: filter }
+    const params = filter === 'ALL' ? {} : { type: filter }
     refresh(params)
   }, [filter])
 
   const getInsightIcon = (type: string) => {
     switch (type) {
-      case 'demand_forecast':
+      case 'DEMAND_FORECAST':
         return TrendingUp
-      case 'reorder_suggestion':
+      case 'REORDER_SUGGESTION':
         return AlertTriangle
-      case 'trend_analysis':
+      case 'TREND_ANALYSIS':
         return Target
-      case 'anomaly_detection':
+      case 'ANOMALY_DETECTION':
         return Zap
       default:
         return Brain
@@ -33,13 +33,13 @@ const AIInsights: React.FC = () => {
 
   const getInsightColor = (type: string) => {
     switch (type) {
-      case 'demand_forecast':
+      case 'DEMAND_FORECAST':
         return 'from-blue-500 to-cyan-500'
-      case 'reorder_suggestion':
+      case 'REORDER_SUGGESTION':
         return 'from-red-500 to-orange-500'
-      case 'trend_analysis':
+      case 'TREND_ANALYSIS':
         return 'from-green-500 to-emerald-500'
-      case 'anomaly_detection':
+      case 'ANOMALY_DETECTION':
         return 'from-purple-500 to-pink-500'
       default:
         return 'from-gray-500 to-gray-600'
@@ -97,11 +97,11 @@ const AIInsights: React.FC = () => {
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-1 bg-muted rounded-lg p-1">
                 {[
-                  { key: 'all', label: 'All Insights' },
-                  { key: 'demand_forecast', label: 'Forecasts' },
-                  { key: 'reorder_suggestion', label: 'Reorders' },
-                  { key: 'trend_analysis', label: 'Trends' },
-                  { key: 'anomaly_detection', label: 'Anomalies' },
+                  { key: 'ALL', label: 'All Insights' },
+                  { key: 'DEMAND_FORECAST', label: 'Forecasts' },
+                  { key: 'REORDER_SUGGESTION', label: 'Reorders' },
+                  { key: 'TREND_ANALYSIS', label: 'Trends' },
+                  { key: 'ANOMALY_DETECTION', label: 'Anomalies' },
                 ].map((tab) => (
                   <Button
                     key={tab.key}

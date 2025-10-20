@@ -53,10 +53,7 @@ const SupplierView: React.FC = () => {
   const [loading, setLoading] = useState(true)
   const [analytics, setAnalytics] = useState<SupplierAnalytics | null>(null)
   const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d' | '1y'>('30d')
-  const [activeTab, setActiveTab] = useState<'overview' | 'performance' | 'products'>('overview')
-
-  //const supplier = suppliers.find(s => s.id === supplierId)
-
+  const [activeTab, setActiveTab] = useState<'OVERVIEW' | 'PERFORMANCE' | 'PRODUCTS'>('OVERVIEW')
   useEffect(() => {
     const fetchAnalytics = async () => {
       if (!supplierId) return
@@ -192,7 +189,7 @@ const SupplierView: React.FC = () => {
       </div>
 
       {/* Overview Tab */}
-      {activeTab === 'overview' && (
+      {activeTab === 'OVERVIEW' && (
         <div className="space-y-6">
           {/* Key Metrics */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -354,7 +351,7 @@ const SupplierView: React.FC = () => {
       )}
 
       {/* Performance Tab */}
-      {activeTab === 'performance' && (
+      {activeTab === 'PERFORMANCE' && (
         <div className="space-y-6">
           {/* Performance Metrics */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -420,7 +417,7 @@ const SupplierView: React.FC = () => {
       )}
 
       {/* Products Tab */}
-      {activeTab === 'products' && (
+      {activeTab === 'PRODUCTS' && (
         <div className="space-y-6">
           {/* Product Summary */}
           <motion.div
